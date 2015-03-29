@@ -1,1 +1,1 @@
-# astrpoy_scripts
+# astropy_scripts
