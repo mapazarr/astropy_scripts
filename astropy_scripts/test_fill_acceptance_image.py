@@ -17,8 +17,9 @@ def gaussian(x, mu, sig):
     return  norm * np.exp(-np.power(x - mu, 2.) / (2. * np.power(sig, 2.)))
 
 #create empty image
-#image = make_empty_image()
-image = make_empty_image(10, 10)
+image = make_empty_image()
+#image = make_empty_image(10, 10)
+#image = make_empty_image(5, 10)
 
 #image is a astropy.io.fits.hdu.image.ImageHDU
 # An ImageHDU has two important attributes:
@@ -137,9 +138,5 @@ plt.draw() #draw plot
 
 #TODO: save fits and image! (and check fits in ds9/fv)!!!!
 #      also for test pyfits!!!!!
-
-#TODO: repo with my test scripts?!!!
-#      or save them in ANALISIS scripts???!!!
-#      better: do repo and create a dir in ANALISIS scripts with a ref to repo!!!
 
 plt.show() # don't quit at the end
