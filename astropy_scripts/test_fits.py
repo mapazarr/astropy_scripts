@@ -47,7 +47,7 @@ ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_title('empty image')
 
-plt.show()
+plt.draw() #draw plot
 
 print ""
 
@@ -73,4 +73,8 @@ ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_title('filled image')
 
-plt.show()
+plt.draw() #draw plot
+
+#TODO: save fits and image (eps, pdf, png)! (and check fits in ds9/fv)!!!!
+
+plt.show()) #don't quit at the end
