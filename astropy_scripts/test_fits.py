@@ -7,8 +7,21 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 #create empty image
-image = make_empty_image()
-#image = make_empty_image(10, 10)
+#image = make_empty_image()
+#I need odd number of pixels if I want to have the center in its own pixel
+nxpix=101
+nypix=101
+#nxpix=11
+#nypix=11
+#nxpix=11
+#nypix=7
+#nxpix=3
+#nypix=3
+binsz=0.1
+image = make_empty_image(nxpix, nypix, binsz,
+                         xref=0, yref=0, fill=0,
+                         proj='CAR', coordsys='GAL',
+                         xrefpix=None, yrefpix=None, dtype='float32')
 
 #image is a astropy.io.fits.hdu.image.ImageHDU
 # An ImageHDU has two important attributes:
