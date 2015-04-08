@@ -75,6 +75,9 @@ ax.set_title('filled image')
 
 plt.draw() #draw plot
 
+#NOTE: los arrays estan definidos al reves: array[y:x], primero la coord "y" y luego la "x" en vez de al reves!!!
+#TODO: a test to reflect this!!! (esto me afecta el test de test_fill_acceptance_image.py!!!
+
 #TODO: save fits and image (eps, pdf, png)! (and check fits in ds9/fv)!!!!
 
 plt.show()) #don't quit at the end
