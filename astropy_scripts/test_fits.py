@@ -7,8 +7,21 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 #create empty image
-image = make_empty_image()
-#image = make_empty_image(10, 10)
+#image = make_empty_image()
+#I need odd number of pixels if I want to have the center in its own pixel
+n_pix_x = 101
+n_pix_y = 101
+#n_pix_x = 11
+#n_pix_y = 11
+#n_pix_x = 11
+#n_pix_y = 7
+#n_pix_x = 3
+#n_pix_y = 3
+bin_size = Angle(0.1, 'degree')
+image = make_empty_image(n_pix_x, n_pix_y, bin_size.to(u.degree).value,
+                         xref=0, yref=0, fill=0,
+                         proj='CAR', coordsys='GAL',
+                         xrefpix=None, yrefpix=None, dtype='float32')
 
 #image is a astropy.io.fits.hdu.image.ImageHDU
 # An ImageHDU has two important attributes:
@@ -32,7 +45,7 @@ print(image.data)
 print ""
 
 #shape returns a tuple object
-print "image.data.shape: ", image.data.shape
+print "image.data.shape:", image.data.shape
 
 print ""
 
@@ -58,7 +71,7 @@ print image.header.tostring('\n', False, False)
 #add random data to the image
 #image.data = np.random.random((128,128))
 image.data = np.random.random(image.data.shape)
-print "image.data.shape: ", image.data.shape
+print "image.data.shape:", image.data.shape
 
 print ""
 

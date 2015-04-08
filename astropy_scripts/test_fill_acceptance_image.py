@@ -40,13 +40,20 @@ from gammapy.image.utils import coordinates
 #    return val
 
 #create empty image
-#image = make_empty_image()
-image = make_empty_image(101, 101)
-#image = make_empty_image(10, 10)
-#image = make_empty_image(11, 11)
-#image = make_empty_image(11, 7)
-#image = make_empty_image(3, 3)
-# I need uneven number of pixels if I want to have the center in its own pixel
+#I need odd number of pixels if I want to have the center in its own pixel
+n_pix_x = 101
+n_pix_y = 101
+#n_pix_x = 11
+#n_pix_y = 11
+#n_pix_x = 11
+#n_pix_y = 7
+#n_pix_x = 3
+#n_pix_y = 3
+bin_size = Angle(0.1, 'degree')
+image = make_empty_image(n_pix_x, n_pix_y, bin_size.to(u.degree).value,
+                         xref=0, yref=0, fill=0,
+                         proj='CAR', coordsys='GAL',
+                         xrefpix=None, yrefpix=None, dtype='float32')
 
 #image is a astropy.io.fits.hdu.image.ImageHDU
 # An ImageHDU has two important attributes:
@@ -112,6 +119,13 @@ center = SkyCoord(l=x_center*u.degree, b=y_center*u.degree, frame='galactic')
 print "center"
 print(center)
 
+#estimate FoV radius (maximum offset) of the image:
+
+fov_x = (n_pix_x*bin_size)/2.
+fov_y = (n_pix_y*bin_size)/2.
+
+print "FoV radius (%f, %f) deg" %(fov_x.to(u.degree).value, fov_y.to(u.degree).value)
+
 #initialize WCS to the header of the image
 w = WCS(image.header)
 
@@ -127,7 +141,9 @@ y_pix_size = Angle(abs(image.header['CDELT2'])*u.degree)
 print ""
 
 #define radial acceptance and offset angles
-offset = Angle(np.arange(0., 30., 0.1), unit=u.degree)
+#using bin_size for the offset step makes the test comparison easier
+#offset = Angle(np.arange(0., 30., 0.1), unit=u.degree)
+offset = Angle(np.arange(0., 30., bin_size.to(u.degree).value), unit=u.degree)
 acceptance = np.zeros_like(offset)
 sigma = Angle(1.0, unit=u.degree) #gaussian width
 #acceptance = radial_gaussian_2D(offset.to(u.radian).value, sigma.to(u.radian).value)
@@ -196,7 +212,7 @@ print "image_int:", image_int
 print "image_int:", image_int.to(u.degree**2)
 
 #integrate acceptance (i.e. gaussian function)
-#1st integrate in r: remember: FoV radius for image of 100 pix of 0.1 deg size is 5 deg
+#1st integrate in r: remember: integrate only to up to image FoV
 #acc_int = Quantity(quad(radial_gaussian_2D, Angle(0.*u.degree).to(u.radian).value,  Angle(5.*u.degree).to(u.radian).value, args=(sigma.to(u.radian).value))*u.radian)
 acc_int = Quantity(quad(gaus_model, Angle(0.*u.degree).to(u.radian).value,  Angle(5.*u.degree).to(u.radian).value, args=(sigma.to(u.radian).value))*u.radian)
 print "acc_int:", acc_int
@@ -223,8 +239,7 @@ for off, acc in zip(offset, acceptance):
     #print " off: %f, acc: %f" %(off.value, acc) #debug
     x_coord = x_center + off
     y_coord = y_center
-    if off < Angle(5, 'degree'):
-    #if off < Angle(0.5, 'degree'):
+    if off < fov_x:
         image_acc = lookup(image, x_coord, y_coord, world=True)
         print " off: %f, acc: %f, image_acc: %f" %(off.value, acc, image_acc) #debug
         decimal = 1
@@ -233,15 +248,7 @@ for off, acc in zip(offset, acceptance):
         #TODO: antes de usar gammapy.image.utils.coordinates en fov.py el assert funcionaba (con decimal=1 pero funcionaba)!!!
         #en cualquier caso: me parece que habia un error en el grid de pixeles tal como estaba antes, pues daba error si usaba una imagen asimetrica (i.e. 5x3)!!!
         #el problema era que los arrays estan definidos al reves: array[y:x], primero la coord "y" y luego la "x" en vez de al reves!!!
-        #pero el test sigue sin funcionar!!!
-
-    ##coord = SkyCoord(l=x_coord*u.degree, b=y_coord*u.degree, frame='galactic')
-
-    #transform to pixel coord
-    
-    ##image_acc = image.data[x_coord_pix, y_coord_pix]
-
-##coord = pixel_to_skycoord(xpix_coord_grid, ypix_coord_grid, w, 0)
+        #pero el test sigue sin funcionar!!! fixme!!!
 
 #test: check points at the offsets where the acceptance is defined along the x axis (i.e. y=0 in pix coord)
 #      another approach to get the data: follow te same functions to get pix coord as in the function to test
@@ -268,8 +275,6 @@ print "here comes the plot"
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-#ax.imshow(pix_off.data[:,:], origin='lower')
-#ax.imshow(pix_off[:,:], origin='lower')
 ax.imshow(pix_off.to(u.degree).value[:,:], origin='lower')
 
 ax.set_xlabel('x')
@@ -282,6 +287,7 @@ print ""
 
 # x axis (i.e. y=0 in pix coord) defined in the array positions [y_center_pix - 1,:]
 # only interested in semi axis, so [y_center_pix - 1, x_center_pix - 1:]
+#WARNING: los arrays estan definidos al reves: array[y:x], primero la coord "y" y luego la "x" en vez de al reves!!!
 print "x_center_pix - 1 = ", x_center_pix - 1 #debug
 print "int(round(x_center_pix - 1)) = ", int(round(x_center_pix - 1)) #debug
 print "y_center_pix - 1 = ", y_center_pix - 1 #debug
@@ -295,44 +301,10 @@ print (pix_off_x_axis.to(u.degree).value)
 print "image.data_x_axis"
 print(image.data_x_axis)
 
-## # cut offset and acceptance arrays to match image size
-## #offset = offset[pix_off_deg_x_axis.size]
-## #offset = offset[pix_off_deg_x_axis.shape]
-## n = pix_off_deg_x_axis.size
-## #n = pix_off_deg_x_axis.shape
-## #n, ny = pix_off_deg_x_axis.shape
-## print "n %i" % n
-## print (n)
-## print "offset"
-## print(offset)
-## #offset_cut = offset[0:n]
-## #print "offset_cut"
-## #offset_cut_deg = offset.to(u.degree).value[0:n]
-## #offset_cut_deg = (offset.to(u.degree).value)[0:n]
-## offset_deg = offset.to(u.degree).value
-## print "offset_deg"
-## print(offset_deg)
-## offset_cut_deg = offset_deg[0:n]
-## #offset_cut_deg = offset_deg[0:n:1]
-## #offset_cut_deg = offset_deg[0:5:1]
-## print "offset_cut_deg"
-## print(offset_cut_deg)
-## #print "offset in deg"
-## #print offset.to(u.degree).value
-## #print "acceptance"
-## #print(acceptance)
-## 
-## nx, ny = image.shape
-## print "nx"
-## print (nx)
-## print "ny"
-## print (ny)
-
-
 print ""
 
 # cut offset and acceptance arrays to match image size
-# this is only valid if the offset step matches the pixel size!!!!!!!!!!!!!!!!!!!!!!!!!
+# this is only valid if the offset step matches the pixel size!!!
 n = pix_off_x_axis.size
 offset_cut = offset[0:n]
 acceptance_cut = acceptance[0:n]
@@ -348,7 +320,6 @@ print ""
 decimal = 4
 s_error = "image acceptance not compatible with defined radial acceptance"
 np.testing.assert_almost_equal(image.data_x_axis, acceptance_cut, decimal, s_error)
-#works only for 3x3 images!!!!!
 
 print ""
 
