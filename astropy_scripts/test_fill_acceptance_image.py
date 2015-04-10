@@ -287,15 +287,15 @@ def test_fill_acceptance_image():
 
     print ""
 
-    # x axis (i.e. y=0 in pix coord) defined in the array positions [y_center_pix - 1,:]
-    # only interested in semi axis, so [y_center_pix - 1, x_center_pix - 1:]
+    # x axis (i.e. y=0 in pix coord) defined in the array positions [y_center_pix,:]
+    # only interested in semi axis, so [y_center_pix, x_center_pix:]
     #WARNING: los arrays estan definidos al reves: array[y:x], primero la coord "y" y luego la "x" en vez de al reves!!!
-    print "x_center_pix - 1 = ", x_center_pix - 1 #debug
-    print "int(round(x_center_pix - 1)) = ", int(round(x_center_pix - 1)) #debug
-    print "y_center_pix - 1 = ", y_center_pix - 1 #debug
-    print "int(round(y_center_pix - 1)) = ", int(round(y_center_pix - 1)) #debug
-    pix_off_x_axis = pix_off[int(round(y_center_pix - 1)), int(round(x_center_pix - 1)):]
-    image.data_x_axis = image.data[int(round(y_center_pix - 1)), int(round(x_center_pix - 1)):]
+    print "x_center_pix = ", x_center_pix #debug
+    print "int(round(x_center_pix)) = ", int(round(x_center_pix)) #debug
+    print "y_center_pix = ", y_center_pix #debug
+    print "int(round(y_center_pix)) = ", int(round(y_center_pix)) #debug
+    pix_off_x_axis = pix_off[int(round(y_center_pix)), int(round(x_center_pix)):]
+    image.data_x_axis = image.data[int(round(y_center_pix)), int(round(x_center_pix)):]
 
     print "pix_off_x_axis in deg"
     print (pix_off_x_axis.to(u.degree).value)
