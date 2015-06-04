@@ -1,6 +1,6 @@
 import numpy as np
 from astropy.table import Table, Column
-from gammapy.datasets.make import generate_observation_table
+from gammapy.datasets.make import make_test_observation_table
 from gammapy.obs import ObservationTable
 
 observatory='HESS'
@@ -16,7 +16,7 @@ print(astro_table)
 
 print ""
 
-obs_table = generate_observation_table(observatory, n_obs)
+obs_table = make_test_observation_table(observatory, n_obs)
 
 print "obs_table.info"
 print obs_table.info()
