@@ -44,7 +44,7 @@ print("type timedelta col", type(astro_table['ONTIME']))
 print("type quantity col", type(astro_table['LIVETIME']))
 
 # read columns from the table
-#import IPython; IPython.embed() #before error line
+#import IPython; IPython.embed() # before error line
 time_col = Time(astro_table['TSTART']) # works fine
 timedelta_col = TimeDelta(astro_table['ONTIME']) # gives an error!
 quantity_col = TimeDelta(astro_table['LIVETIME']) # works fine
@@ -53,5 +53,5 @@ print()
 
 # better output if running ipython!
 print(time_col.__dict__)
-#print(timedelta_col.__dict__)
+print(timedelta_col.__dict__) # faulty!
 print(quantity_col.__dict__)
