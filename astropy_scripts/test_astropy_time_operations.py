@@ -71,8 +71,15 @@ print("delta_time_calc_per_hand_format_sec")
 print(delta_time_calc_per_hand_format_sec)
 print(type(delta_time_calc_per_hand_format_sec))
 
-# test if delta time is calculated correctly
+print()
+
 delta_time = time_relative_to_ref(time, time_ref_dict)
+
+print("delta_time")
+print(delta_time)
+print(type(delta_time))
+
+# test if delta time is calculated correctly
 decimal = 4
 s_error = "delta time not compatible with defined value"
 np.testing.assert_almost_equal(delta_time.sec, delta_time_1sec.sec, decimal, s_error)
@@ -131,3 +138,18 @@ delta_time_night_duration = TimeDelta(6.*60.*60., format='sec')
 
 print("delta_time_night_duration")
 var_debug(delta_time_night_duration)
+
+print()
+
+#add 2 time objects
+# I can't add time objects, but I can subtract them (the result is the TimeDelta between both, not a Time)
+date1 = Time('2010-01-01 00:00:00', format='iso', scale='utc')
+date2 = Time('2010-02-01 00:00:00', format='iso', scale='utc')
+
+#date_1plus2 = date1 + date2 # faulty!
+#print("date_1plus2")
+#var_debug(date_1plus2)
+
+date_1minus2 = date1 - date2
+print("date_1minus2")
+var_debug(date_1minus2)
