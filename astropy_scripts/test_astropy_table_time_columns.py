@@ -24,8 +24,10 @@ astro_table.add_column(col_time_start)
 
 # on time: 30 min
 ontime = TimeDelta(30.*60.*np.ones_like(col_obs_id.data), format='sec')
-col_ontime = Column(name='ONTIME', data=ontime)
-astro_table.add_column(col_ontime)
+#col_ontime = Column(name='ONTIME', data=ontime) #faulty!
+#astro_table.add_column(col_ontime)
+astro_table['ONTIME'] = ontime #works fine, but still no unit showing in the column
+# ref: https://github.com/astropy/astropy/issues/3832
 
 # try Quantity instead of TimeDelta quantity
 
