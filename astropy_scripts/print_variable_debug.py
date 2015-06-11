@@ -26,8 +26,9 @@ def print_variable_debug(var, DEBUG=False):
 ##    #print(type(var_as_str)) # type of var name
 ##
     print(var)
-    #print ("var =", var) #nice dict, as if calling "var" in python interactive seesion (ipython) #works nicely only in python 2!!!
     print(type(var))
+    #print(str(var)) # equivalent to print(var)
+    print(repr(var)) #nice dict, as if calling "var" in python interactive seesion (ipython)
 
     # detect if the var has a dict associated
     no_dict = False
@@ -40,14 +41,3 @@ def print_variable_debug(var, DEBUG=False):
         print(var.__dict__) #this is ugly! I should use it onlyin DEBUG, but the nice one should work 1st!!! #NOT ALL TYPES HAVE A DICT!!!! (i.e. float)
     if DEBUG:
         print("id =", id(var)) #memory address
-
-    #nice dict, as if calling "var" in python interactive seesion (ipython)
-    #needs name of the variable as string!!!
-    #dict((name,eval(name)) for name in [var_as_str])
-    #var = var
-    #dict((name,eval(name)) for name in ['var'])
-
-    #var_copy = var
-    #var_copy = type(var)()
-    #var_copy = type(var[0])()
-    #dict((name,eval(name)) for name in ['var_copy'])
