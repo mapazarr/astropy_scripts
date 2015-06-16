@@ -2,6 +2,8 @@
 from gammapy.image import make_empty_image
 
 from astropy.io import fits
+from astropy.coordinates import Angle
+import astropy.units as u
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -93,4 +95,4 @@ plt.draw() #draw plot
 
 #TODO: save fits and image (eps, pdf, png)! (and check fits in ds9/fv)!!!!
 
-plt.show()) #don't quit at the end
+plt.show() #don't quit at the end
