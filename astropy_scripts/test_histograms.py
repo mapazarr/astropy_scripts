@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import LogNorm
 from pylab import *
+import matplotlib.mlab as mlab
 
 GRAPH_DEBUG = 0
 
@@ -78,6 +79,61 @@ print()
 ############
 # plotting #
 ############
+
+# Examples of 1D histogram plots
+# ref: http://matplotlib.org/examples/statistics/histogram_demo_features.html
+#      http://matplotlib.org/examples/statistics/histogram_demo_histtypes.html
+
+# 1st example
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+# example data
+mu = 100 # mean of distribution
+sigma = 15 # standard deviation of distribution
+x = mu + sigma * np.random.randn(10000)
+
+num_bins = 50
+# the histogram of the data
+n, bins, patches = plt.hist(x, num_bins, normed=1, facecolor='green', alpha=0.5)
+# add a 'best fit' line
+y = mlab.normpdf(bins, mu, sigma)
+plt.plot(bins, y, 'r--')
+plt.xlabel('Smarts')
+plt.ylabel('Probability')
+plt.title(r'Histogram of IQ: $\mu=100$, $\sigma=15$')
+
+# Tweak spacing to prevent clipping of ylabel
+plt.subplots_adjust(left=0.15)
+plt.draw()
+
+if GRAPH_DEBUG:
+    plt.show() # wait until image is closed
+
+# 2nd example
+
+mu = 200
+sigma = 25
+x = mu + sigma*np.random.randn(10000)
+
+fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(8, 4))
+
+ax0.hist(x, 20, normed=1, histtype='stepfilled', facecolor='g', alpha=0.75)
+ax0.set_title('stepfilled')
+
+# Create a histogram by providing the bin edges (unequally spaced).
+bins = [100, 150, 180, 195, 205, 220, 250, 300]
+ax1.hist(x, bins, normed=1, histtype='bar', rwidth=0.8)
+ax1.set_title('unequal bins')
+
+plt.tight_layout()
+plt.draw()
+
+if GRAPH_DEBUG:
+    plt.show() # wait until image is closed
+
+# TODO: try to make plots with my numpy 1D histogram objects: is it possible, or do I have to use the "hist" method of matplotlib/pyplot?
 
 # plot 2D histogram in 3D (with bars)
 # ref: http://matplotlib.org/examples/mplot3d/hist3d_demo.html
