@@ -95,4 +95,27 @@ plt.draw() #draw plot
 
 #TODO: save fits and image (eps, pdf, png)! (and check fits in ds9/fv)!!!!
 
-plt.show() #don't quit at the end
+# read files (bg cube)
+DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
+filenames = ['bg_test.fits', 'bkgcube.fits']
+for filename in filenames:
+    print()
+    print("filename: {}".format(filename))
+    filename = DIR + filename
+
+    hdulist = fits.open(filename)
+
+    hdulist.info()
+
+    # bg cube?
+    print("hdulist[0]")
+    print(repr(hdulist[0].header))
+    print(hdulist[0].data)
+
+    # emin emax binning
+    print("hdulist[1]")
+    print(repr(hdulist[1].header))
+    print(hdulist[1].data)
+
+import IPython; IPython.embed()
+#plt.show() #don't quit at the end
