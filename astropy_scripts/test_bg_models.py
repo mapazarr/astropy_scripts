@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals) # python 2 as python 3
+from astropy.units import Quantity
+from astropy.coordinates import Angle
 from gammapy.background.models import CubeBackgroundModel
 
 def plot_example():
@@ -9,7 +11,27 @@ def plot_example():
     DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
     filename = DIR + 'hist_alt3_az0.fits.gz'
     bg_model = CubeBackgroundModel.read(filename)
-    bg_model.plot_images('cube_background_model.png')
+
+    bg_model.plot_images()
+    #bg_model.plot_images(energy=Quantity(1., 'TeV'))
+    #bg_model.plot_images(energy=Quantity(2., 'TeV'))
+    #bg_model.plot_images(energy=Quantity(3., 'TeV'))
+    #bg_model.plot_images(energy=Quantity(1.53216636, 'TeV'))
+    #bg_model.plot_images(energy=Quantity(2.27553916, 'TeV'))
+    #bg_model.plot_images(energy=Quantity(80., 'TeV'))
+    #bg_model.plot_images(energy=Quantity([1.], 'TeV'))
+    #bg_model.plot_images(energy=Quantity([2.], 'TeV'))
+    #bg_model.plot_images(energy=Quantity([1., 2.], 'TeV'))
+
+    bg_model.plot_spectra()
+    #bg_model.plot_spectra(det=Angle([0., 0.], 'degree'))
+    #bg_model.plot_spectra(det=Angle([0., 2.], 'degree'))
+    #bg_model.plot_spectra(det=Angle([-5., 0.], 'degree'))
+    #bg_model.plot_spectra(det=Angle([0., -5.], 'degree'))
+    #bg_model.plot_spectra(det=Angle([-5., -5.], 'degree'))
+    #bg_model.plot_spectra(det=Angle([[0., 0.]], 'degree'))
+    #bg_model.plot_spectra(det=Angle([[0., 0.], [1., 1.]], 'degree'))
+
     bg_model.write_cube('cube_background_model.fits')
 
 def gammapy_tests():
