@@ -44,11 +44,14 @@ def gammapy_tests():
     """Testing the tests for gammapy.
     """
     # test shape of bg cube when reading a file
-    #DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
-    ##filenames = ['bg_test.fits', 'bkgcube.fits']
-    #filenames = ['bg_test.fits']
-    DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
-    filenames = ['hist_alt3_az0.fits.gz']
+    DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
+    #filenames = ['bg_test.fits', 'bkgcube.fits']
+    # WARNING! bkgcube.fits has a different format:
+    # I think it's projected bg model in RA dec!!!
+    # (maybe we need an extra class for this?!!!)
+    filenames = ['bg_test.fits']
+    #DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
+    #filenames = ['hist_alt3_az0.fits.gz']
     # TODO: intentar hacerlo con las IRFs de CTA: !!!!!!!
     # https://github.com/gammapy/gammapy/issues/267
     for filename in filenames:
@@ -112,12 +115,36 @@ def gammapy_tests():
     np.testing.assert_almost_equal(plot_data[:,1], model_data.value, decimal)
 
 
-    plt.show()#TODO: use graph debug!!!! (or not?)
-
-    #TODO: creo que el archivo de ejemplo tiene detx dety en radianes!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!(y yo con las unidades hardcoded :-D)!!!!
+    #TODO: creo que el archivo de ejemplo tiene detx dety en radianes!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!(y yo con las unidades hardcoded :-D)!!!! ya no, pero el archivo no pone las unidades!!!
     # mirar si ese archivo tiene las unidades por algun sitio....!!!!!!!!!!!!!!!!!!!
 
-    #TODO: test save!!!!
+    # test write (save)
+    # test if values are correct in the saved file: compare both files
+    bg_model_1 = bg_cube_model
+    outfile = 'bg_model.fits'
+    bg_cube_model.write(outfile)
+    bg_model_2 = CubeBackgroundModel.read(outfile)
+    decimal = 4
+    np.testing.assert_almost_equal(bg_model_2.background.value,
+                                   bg_model_1.background.value, decimal)
+    np.testing.assert_almost_equal(bg_model_2.det_bins.value,
+                                   bg_model_1.det_bins.value, decimal)
+    np.testing.assert_almost_equal(bg_model_2.energy_bins.value,
+                                   bg_model_1.energy_bins.value, decimal)
+    # TODO: clean up after test (remove created files)
+    # TODO: test also write_image
+
+
+
+
+
+
+    bg_cube_model.write_image('bg_model_image.fits')
+
+
+    # TODO: clean up after tests (remove created files) !!!!!!!!!!!!!!!!!!!!!!
+
+    plt.show() #don't quit at the end
 
 
 if __name__ == '__main__':
