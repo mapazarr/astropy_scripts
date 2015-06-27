@@ -5,6 +5,7 @@ from gammapy.obs import DataStore, ObservationTable
 from gammapy.datasets.make import make_test_observation_table
 
 # case 1: using `~gammapy.obs.DataStore.make_observation_table` (works)
+#         this function returns an astropy Table object
 HESSFITS_MPP = '/home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std/'
 data_store = DataStore(dir=HESSFITS_MPP)
 obs_table1 = data_store.make_observation_table()
@@ -20,6 +21,7 @@ filtered_obs_table1 = obs_table1[zenith_mask]
 print(repr(filtered_obs_table1))
 
 # case 2: using `~gammapy.make.make_test_observation_table` (fails!)
+#         this function returns a gammapy ObservationTable object
 observatory_name='HESS'
 n_obs = 10
 obs_table2 = make_test_observation_table(observatory_name, n_obs)
