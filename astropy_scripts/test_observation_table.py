@@ -1,35 +1,38 @@
-#import gammapy
-from gammapy.obs import DataStore
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals) # python 2 as python 3
 from astropy.coordinates import Angle
+from gammapy.obs import DataStore, ObservationTable
 from gammapy.datasets.make import make_test_observation_table
+
+# case 1: using `~gammapy.obs.DataStore.make_observation_table` (works)
 HESSFITS_MPP = '/home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std/'
 data_store = DataStore(dir=HESSFITS_MPP)
-observation_table = data_store.make_observation_table()
+obs_table1 = data_store.make_observation_table()
 #observatory_name='HESS'
 #n_obs = 100
 #observation_table = make_test_observation_table(observatory_name, n_obs)
-zenith_edges = Angle([0., 20., 40.], 'degree')
-zenith = Angle(90., 'degree') - observation_table['ALT_PNT']
-#zenith = Angle(90., 'degree') - observation_table['ALT']
-for i in range (0, len(zenith_edges) - 1):
-    zenith_mask = (zenith_edges[i] <= zenith) & (zenith < zenith_edges[i + 1])
-    print(repr(zenith_mask), zenith_mask.shape)
-    observation_table_filtered = observation_table[zenith_mask]
-gammapy.obs
-
-from gammapy.obs import ObservationTable
-from gammapy.datasets.make import make_test_observation_table
-from astropy.coordinates import Angle
-observatory_name='HESS'
-n_obs = 10
-obs_table = make_test_observation_table(observatory_name, n_obs)
 zenith_min = Angle(20., 'degree')
 zenith_max = Angle(40., 'degree')
-#zenith = Angle(90., 'degree') - obs_table['ALT']
-zenith = Angle(90., 'degree') - Angle(obs_table['ALT'], 'deg')
+zenith = Angle(90., 'degree') - obs_table1['ALT_PNT']
 zenith_mask = (zenith_min <= zenith) & (zenith < zenith_max)
 print(repr(zenith_mask), zenith_mask.shape)
-filtered_obs_table = obs_table[zenith_mask]
+filtered_obs_table1 = obs_table1[zenith_mask]
+print(repr(filtered_obs_table1))
+
+# case 2: using `~gammapy.make.make_test_observation_table` (fails!)
+observatory_name='HESS'
+n_obs = 10
+obs_table2 = make_test_observation_table(observatory_name, n_obs)
+zenith_min = Angle(20., 'degree')
+zenith_max = Angle(40., 'degree')
+zenith = Angle(90., 'degree') - obs_table2['ALT']
+#zenith = Angle(90., 'degree') - Angle(obs_table2['ALT'], 'deg') # neede if returning obs_table as astropy Table (using array object: return Table(np.array(obs_table)))
+zenith_mask = (zenith_min <= zenith) & (zenith < zenith_max)
+print(repr(zenith_mask), zenith_mask.shape)
+filtered_obs_table2 = obs_table2[zenith_mask]
+print(repr(filtered_obs_table2))
+
+import IPython; IPython.embed()
 
 ##EL PROBLEMA ESTA EN make_test_observation_table!!!!!!!!!!!!!
 ## en realidad no: con data_store.make_observation_table funciona porque devuelve una Table; pero make_test_observation_table devuelve una ObservationTable; si lo fuerzo a devolver una Table funciona
