@@ -35,27 +35,71 @@ def test_filter_observations():
     print(obs_table)
     print("filtered_obs_table")
     print(filtered_obs_table)
-
-#    return
-
-    ##assert len(filtered_obs_table) == len(obs_table) #FIX THIS (IN CASE I DON'T RETURN A COPY OF THE OBJECT IN filter_observations!!!!!!!!!!!)!!!!!!!!!!
-    #TODO: a lo mejor el fallo ya estaba de antes: intentar recuperar el estado inicial y hacer un test de select sky box sin mover el codigo!!!!!!!!!!!!!!!!!!!!!
-    # intentar poner un ipithon en el table(mask)
-    # intentar hacer table(mask=mask) en el sky box
-    # probar en generico un table(mask) sin estar enterrado en 1000 clases
-    # probar un obs_table(mask) tb.
-    
+    assert len(filtered_obs_table) == len(obs_table)
 
     # filter some pars and check the correspoding values in the columns
 
-    # test box selection in gal coordinates
+    # test box selection in obs_id
     print()
-    print("Test box selection in gal coordinates:")
+    print("Test box selection in OBS_ID")
+    variable = 'OBS_ID'
+    min = 2
+    max = 5
+    selection = dict(shape='box', variable=variable,
+                     min=min, max=max)
+    filtered_obs_table = obs_table.filter_observations(selection)
+    print("obs_table")
+    print(obs_table)
+    print("filtered_obs_table")
+    print(filtered_obs_table)
+    assert len(filtered_obs_table) == 3
+    assert (min <= filtered_obs_table[variable]).all()
+    assert (filtered_obs_table[variable] < max).all()
+
+    # test box selection in obs_id inverted
+    print()
+    print("Test box selection in OBS_ID inverted")
+    variable = 'OBS_ID'
+    min = 2
+    max = 5
+    selection = dict(shape='box', variable=variable,
+                     min=min, max=max, inverted=True)
+    filtered_obs_table = obs_table.filter_observations(selection)
+    print("obs_table")
+    print(obs_table)
+    print("filtered_obs_table")
+    print(filtered_obs_table)
+    assert len(filtered_obs_table) == 7
+    assert ((min > filtered_obs_table[variable]) |
+            (filtered_obs_table[variable] >= max)).all()
+
+    # test circle selection in obs_id
+    print()
+    print("Test circle selection in OBS_ID")
+    variable = 'OBS_ID'
+    center = 4
+    radius = 2
+    selection = dict(shape='circle', variable=variable,
+                     center=center, radius=radius)
+    filtered_obs_table = obs_table.filter_observations(selection)
+    print("obs_table")
+    print(obs_table)
+    print("filtered_obs_table")
+    print(filtered_obs_table)
+    assert len(filtered_obs_table) == 4
+    assert (center - radius <= filtered_obs_table[variable]).all()
+    assert (filtered_obs_table[variable] < center + radius).all()
+
+    return
+
+    # test sky box selection in gal coordinates
+    print()
+    print("Test sky box selection in gal coordinates:")
     lon_min = -100.
     lon_max = 50.
     lat_min = -5.
     lat_max = 5.
-    selection = dict(shape='box', frame='galactic',
+    selection = dict(shape='sky_box', frame='galactic',
                      lon=(lon_min, lon_max), lat=(lat_min, lat_max), border=2.)
     filtered_obs_table = obs_table.filter_observations(selection)
     print("obs_table")
