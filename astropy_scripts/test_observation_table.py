@@ -95,4 +95,4 @@ print(repr(filtered_obs_table2))
 ## asi que el problema esta en la clase ObservationTable!!!!!!
 #TODO: hacer que ambas funciones (make_test_observation_table y data_store.make_observation_table) devuelvan una ObservationTable!!!
 # hacer que ObservationTable funcione bien!!!!!!!!!!!!!!!!!!!!!
-# AL USAR DIRECTAMENTE UNA OBS_TABLE (simple) FUNIONA!!!! -> probar obs_table compleja; el problema podria estar en el make_test_observation_table !!! (intentar usar make_test_observation_table con una obs table sencilla?)!!!
+# AL USAR DIRECTAMENTE UNA OBS_TABLE (simple) FUNIONA!!!! -> probar obs_table compleja; el problema podria estar en el make_test_observation_table !!! (intentar usar make_test_observation_table con una obs table sencilla?)!!! -> ya esta: el problema era un fallo tonto al definir el header de la tabla.
