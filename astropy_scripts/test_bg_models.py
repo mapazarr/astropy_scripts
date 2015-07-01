@@ -5,17 +5,21 @@ import matplotlib.pyplot as plt
 from astropy.units import Quantity
 from astropy.coordinates import Angle
 from gammapy.background.models import CubeBackgroundModel
+from gammapy import datasets
 
 GRAPH_DEBUG = 0
 
 def plot_example():
     """Plot background model and store as cube so that it can viewed with ds9.
     """
-    #DIR = '/Users/deil/work/_Data/hess/HESSFITS/pa/Model_Deconvoluted_Prod26/Mpp_Std/background/'
-    #DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
-    #filename = DIR + 'hist_alt3_az0.fits.gz'
-    DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
-    filename = DIR + 'bg_test.fits'
+    ##DIR = '/Users/deil/work/_Data/hess/HESSFITS/pa/Model_Deconvoluted_Prod26/Mpp_Std/background/'
+    ##DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
+    ##filename = DIR + 'hist_alt3_az0.fits.gz'
+    #DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
+    #filename = DIR + 'bg_test.fits'
+    filename = '../test_datasets/background/bg_cube_model_test.fits'
+    filename = datasets.get_path(filename, location='remote')
+
     bg_model = CubeBackgroundModel.read(filename)
 
     bg_model.plot_images()
@@ -44,20 +48,22 @@ def gammapy_tests():
     """Testing the tests for gammapy.
     """
     # test shape of bg cube when reading a file
-    DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
-    #filenames = ['bg_test.fits', 'bkgcube.fits']
-    # WARNING! bkgcube.fits has a different format:
-    # I think it's projected bg model in RA dec!!!
-    # (maybe we need an extra class for this?!!!)
-    filenames = ['bg_test.fits']
-    #DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
-    #filenames = ['hist_alt3_az0.fits.gz']
-    # TODO: intentar hacerlo con las IRFs de CTA: !!!!!!!
-    # https://github.com/gammapy/gammapy/issues/267
+    #DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
+    ##filenames = ['bg_test.fits', 'bkgcube.fits']
+    ## WARNING! bkgcube.fits has a different format:
+    ## I think it's projected bg model in RA dec!!!
+    ## (maybe we need an extra class for this?!!!)
+    #filenames = ['bg_test.fits']
+    ##DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
+    ##filenames = ['hist_alt3_az0.fits.gz']
+    ## TODO: intentar hacerlo con las IRFs de CTA: !!!!!!!
+    ## https://github.com/gammapy/gammapy/issues/267
+    filenames = ['../test_datasets/background/bg_cube_model_test.fits']
     for filename in filenames:
         print()
         print("filename: {}".format(filename))
-        filename = DIR + filename
+        #filename = DIR + filename
+        filename = datasets.get_path(filename, location='remote')
         bg_cube_model = CubeBackgroundModel.read(filename)
         print("bg_cube_model.background.shape", bg_cube_model.background.shape)
         print("len(bg_cube_model.background.shape)", len(bg_cube_model.background.shape))
@@ -91,7 +97,6 @@ def gammapy_tests():
     decimal = 4
     np.testing.assert_almost_equal(plot_data, model_data.value, decimal)
 
-
     # test spectrum plot:
     # test bg rate values plotted for spectrum plot of detector bin conaining det (0, 0) deg (center)
     det = Angle([0., 0.], 'degree')
@@ -114,10 +119,6 @@ def gammapy_tests():
     decimal = 4
     np.testing.assert_almost_equal(plot_data[:,1], model_data.value, decimal)
 
-
-    #TODO: creo que el archivo de ejemplo tiene detx dety en radianes!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!(y yo con las unidades hardcoded :-D)!!!! ya no, pero el archivo no pone las unidades!!!
-    # mirar si ese archivo tiene las unidades por algun sitio....!!!!!!!!!!!!!!!!!!!
-
     # test write (save)
     # test if values are correct in the saved file: compare both files
     bg_model_1 = bg_cube_model
@@ -133,20 +134,44 @@ def gammapy_tests():
                                    bg_model_1.energy_bins.value, decimal)
     # TODO: clean up after test (remove created files)
     # TODO: test also write_image
-
-
-
-
-
-
     bg_cube_model.write_image('bg_model_image.fits')
 
 
-    # TODO: clean up after tests (remove created files) !!!!!!!!!!!!!!!!!!!!!!
+    # TODO: clean up after tests (remove created files) !!!!!!!!!!!!!!!!!!!!!! (add option/flag to aventually keep them)
 
     plt.show() #don't quit at the end
+
+def test_remote_data():
+
+    # test local path
+    # checks (localy) in gammapy/gammapy/datasets/data
+    print()
+    local_path = datasets.get_path('fermi/fermi_counts.fits.gz')
+    print("local_path", local_path)
+
+    # test remote path
+    # checks (remotely) in gammapy/gammapy-extra/datasets
+    print()
+    remote_path = datasets.get_path('vela_region/counts_vela.fits', location='remote')
+    print("remote_path", remote_path)
+
+    # test local path
+    print()
+    # checks (localy) in gammapy/gammapy/datasets/data
+    #local_path = datasets.get_path('bg_test.fits')
+    #local_path = datasets.get_path('data/bg_test.fits')
+    local_path = datasets.get_path('../../background/tests/data/bg_test.fits')
+    print("local_path", local_path)
+
+    # test remote path
+    print()
+    # checks (remotely) in gammapy/gammapy-extra/datasets
+    #remote_path = datasets.get_path('bg_cube_model_test.fits', location='remote')
+    remote_path = datasets.get_path('../test_datasets/background/bg_cube_model_test.fits', location='remote')
+    print("remote_path", remote_path)
 
 
 if __name__ == '__main__':
     #plot_example()
     gammapy_tests()
+    #test_remote_data()
