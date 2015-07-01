@@ -1,0 +1,9 @@
+# Ignore the following files:
+*.png
+*.fits
+*.gz
+*.tgz
+*.root
+*SAVE*
+*~
+*.pyc
