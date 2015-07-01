@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals) # python 2 as python 3
 import numpy as np
 from astropy.time import Time, TimeDelta
-from gammapy.utils.time import time_ref_from_dict, time_relative_to_ref
+from gammapy.time.utils import time_ref_from_dict, time_relative_to_ref, absolute_time
 from print_variable_debug import print_variable_debug as var_debug
 
 # inspired from gammapy.utils.time
@@ -153,3 +153,16 @@ date2 = Time('2010-02-01 00:00:00', format='iso', scale='utc')
 date_1minus2 = date1 - date2
 print("date_1minus2")
 var_debug(date_1minus2)
+
+print()
+
+#test get an absolute time from a MET and a reference
+time_ref_dict = dict(MJDREFI=500, MJDREFF=0.5)
+time_ref = time_ref_from_dict(time_ref_dict)
+delta_time_1sec = TimeDelta(1., format='sec')
+time = time_ref + delta_time_1sec
+abs_time = absolute_time(delta_time_1sec, time_ref_dict)
+print("time = {}".format(repr(time)))
+print("time.utc.iso = {}".format(repr(time.utc.iso)))
+print("abs_time = {}".format(repr(abs_time)))
+assert abs_time.value == time.utc.iso
