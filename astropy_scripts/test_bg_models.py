@@ -44,6 +44,7 @@ def plot_example():
 
     bg_model.write_cube('cube_background_model.fits')
 
+
 def gammapy_tests():
     """Testing the tests for gammapy.
     """
@@ -70,7 +71,7 @@ def gammapy_tests():
         assert len(bg_cube_model.background.shape) == 3
         #import IPython; IPython.embed()
 
-    # test image plot:
+    # test image plot: (OLD BORRAR!!!!)
     # test bg rate values plotted for image plot of energy bin conaining E = 2 TeV
     energy = Quantity(2., 'TeV')
     fig_image, ax_im, image_im = bg_cube_model.plot_images(energy)
@@ -128,8 +129,10 @@ def gammapy_tests():
     decimal = 4
     np.testing.assert_almost_equal(bg_model_2.background.value,
                                    bg_model_1.background.value, decimal)
-    np.testing.assert_almost_equal(bg_model_2.det_bins.value,
-                                   bg_model_1.det_bins.value, decimal)
+    np.testing.assert_almost_equal(bg_model_2.detx_bins.value,
+                                   bg_model_1.detx_bins.value, decimal)
+    np.testing.assert_almost_equal(bg_model_2.dety_bins.value,
+                                   bg_model_1.dety_bins.value, decimal)
     np.testing.assert_almost_equal(bg_model_2.energy_bins.value,
                                    bg_model_1.energy_bins.value, decimal)
     # TODO: clean up after test (remove created files)
@@ -141,7 +144,10 @@ def gammapy_tests():
 
     plt.show() #don't quit at the end
 
+
 def test_remote_data():
+    """Testing the use of remote data in gammapy.
+    """
 
     # test local path
     # checks (localy) in gammapy/gammapy/datasets/data
