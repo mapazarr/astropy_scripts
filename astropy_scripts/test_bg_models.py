@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals) # python 2 as python 3
+from tempfile import NamedTemporaryFile
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.units import Quantity
@@ -8,6 +9,7 @@ from gammapy.background.models import CubeBackgroundModel
 from gammapy import datasets
 
 GRAPH_DEBUG = 0
+USE_TEMP_FILES = 1
 
 def plot_example():
     """Plot background model and store as cube so that it can viewed with ds9.
@@ -20,7 +22,7 @@ def plot_example():
     filename = '../test_datasets/background/bg_cube_model_test.fits'
     filename = datasets.get_path(filename, location='remote')
 
-    bg_model = CubeBackgroundModel.read(filename)
+    bg_model = CubeBackgroundModel.read_bin_table(filename)
 
     bg_model.plot_images()
     #bg_model.plot_images(energy=Quantity(1., 'TeV'))
@@ -42,7 +44,8 @@ def plot_example():
     #bg_model.plot_spectra(det=Angle([[0., 0.]], 'degree'))
     #bg_model.plot_spectra(det=Angle([[0., 0.], [1., 1.]], 'degree'))
 
-    bg_model.write_cube('cube_background_model.fits')
+    outfile = 'cube_background_model.fits'
+    bg_model.write_image(outfile, clobber=True) # overwrite
 
 
 def gammapy_tests():
@@ -65,7 +68,7 @@ def gammapy_tests():
         print("filename: {}".format(filename))
         #filename = DIR + filename
         filename = datasets.get_path(filename, location='remote')
-        bg_cube_model = CubeBackgroundModel.read(filename)
+        bg_cube_model = CubeBackgroundModel.read_bin_table(filename)
         print("bg_cube_model.background.shape", bg_cube_model.background.shape)
         print("len(bg_cube_model.background.shape)", len(bg_cube_model.background.shape))
         assert len(bg_cube_model.background.shape) == 3
@@ -101,6 +104,7 @@ def gammapy_tests():
     # test spectrum plot:
     # test bg rate values plotted for spectrum plot of detector bin conaining det (0, 0) deg (center)
     det = Angle([0., 0.], 'degree')
+    #det = Angle([0., 2.], 'degree')
     fig_spec, ax_spec, image_spec = bg_cube_model.plot_spectra(det)
     plt.draw()
     if GRAPH_DEBUG:
@@ -123,9 +127,13 @@ def gammapy_tests():
     # test write (save)
     # test if values are correct in the saved file: compare both files
     bg_model_1 = bg_cube_model
-    outfile = 'bg_model.fits'
-    bg_cube_model.write(outfile)
-    bg_model_2 = CubeBackgroundModel.read(outfile)
+    if not USE_TEMP_FILES:
+        outfile = 'bg_model.fits'
+    else:
+        outfile = NamedTemporaryFile(suffix='.fits').name
+    print("Writing file {}".format(outfile))
+    bg_cube_model.write_bin_table(outfile, clobber=True) # overwrite
+    bg_model_2 = CubeBackgroundModel.read_bin_table(outfile)
     decimal = 4
     np.testing.assert_almost_equal(bg_model_2.background.value,
                                    bg_model_1.background.value, decimal)
@@ -135,9 +143,10 @@ def gammapy_tests():
                                    bg_model_1.dety_bins.value, decimal)
     np.testing.assert_almost_equal(bg_model_2.energy_bins.value,
                                    bg_model_1.energy_bins.value, decimal)
-    # TODO: clean up after test (remove created files)
-    # TODO: test also write_image
-    bg_cube_model.write_image('bg_model_image.fits')
+
+    # TODO: test also read_image and write_image
+    outfile = 'bg_model_image.fits'
+    bg_cube_model.write_image(outfile, clobber=True) # overwrite
 
 
     # TODO: clean up after tests (remove created files) !!!!!!!!!!!!!!!!!!!!!! (add option/flag to aventually keep them)
