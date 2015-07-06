@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals) # python 2 as python 3
 from tempfile import NamedTemporaryFile
 import numpy as np
+from numpy.testing import assert_allclose
 import matplotlib.pyplot as plt
 from astropy.units import Quantity
 from astropy.coordinates import Angle
@@ -98,8 +99,7 @@ def gammapy_tests():
     print(model_data)
 
     # test if both arrays are equal
-    decimal = 4
-    np.testing.assert_almost_equal(plot_data, model_data.value, decimal)
+    assert_allclose(plot_data, model_data.value)
 
     # test spectrum plot:
     # test bg rate values plotted for spectrum plot of detector bin conaining det (0, 0) deg (center)
@@ -121,8 +121,7 @@ def gammapy_tests():
     print(model_data)
 
     # test if both arrays are equal
-    decimal = 4
-    np.testing.assert_almost_equal(plot_data[:,1], model_data.value, decimal)
+    assert_allclose(plot_data[:,1], model_data.value)
 
     # test write (save)
     # test if values are correct in the saved file: compare both files
@@ -134,15 +133,14 @@ def gammapy_tests():
     print("Writing file {}".format(outfile))
     bg_cube_model.write_bin_table(outfile, clobber=True) # overwrite
     bg_model_2 = CubeBackgroundModel.read_bin_table(outfile)
-    decimal = 4
-    np.testing.assert_almost_equal(bg_model_2.background.value,
-                                   bg_model_1.background.value, decimal)
-    np.testing.assert_almost_equal(bg_model_2.detx_bins.value,
-                                   bg_model_1.detx_bins.value, decimal)
-    np.testing.assert_almost_equal(bg_model_2.dety_bins.value,
-                                   bg_model_1.dety_bins.value, decimal)
-    np.testing.assert_almost_equal(bg_model_2.energy_bins.value,
-                                   bg_model_1.energy_bins.value, decimal)
+    assert_allclose(bg_model_2.background.value,
+                                   bg_model_1.background.value)
+    assert_allclose(bg_model_2.detx_bins.value,
+                                   bg_model_1.detx_bins.value)
+    assert_allclose(bg_model_2.dety_bins.value,
+                                   bg_model_1.dety_bins.value)
+    assert_allclose(bg_model_2.energy_bins.value,
+                                   bg_model_1.energy_bins.value)
 
     # TODO: test also read_image and write_image
     outfile = 'bg_model_image.fits'
