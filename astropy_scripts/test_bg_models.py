@@ -6,16 +6,17 @@ from numpy.testing import assert_allclose
 import matplotlib.pyplot as plt
 from astropy.units import Quantity
 from astropy.coordinates import Angle
-from gammapy.background.models import CubeBackgroundModel
+from gammapy.background import CubeBackgroundModel
+from gammapy.background import make_linear_bin_edges_arrays_from_wcs, make_linear_wcs_from_bin_edges_arrays
 from gammapy import datasets
 
 GRAPH_DEBUG = 0
-USE_TEMP_FILES = 1
+USE_TEMP_FILES = 0
 
 def plot_example():
     """Plot background model and store as cube so that it can viewed with ds9.
     """
-    ##DIR = '/Users/deil/work/_Data/hess/HESSFITS/pa/Model_Deconvoluted_Prod26/Mpp_Std/background/'
+    ###DIR = '/Users/deil/work/_Data/hess/HESSFITS/pa/Model_Deconvoluted_Prod26/Mpp_Std/background/'
     ##DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
     ##filename = DIR + 'hist_alt3_az0.fits.gz'
     #DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
@@ -141,6 +142,30 @@ def gammapy_tests():
                                    bg_model_1.dety_bins.value)
     assert_allclose(bg_model_2.energy_bins.value,
                                    bg_model_1.energy_bins.value)
+
+    # test WCS object
+    print()
+    print("Testing make WCS")
+    bins_x = Angle([1., 2., 3., 4.], 'degree')
+    #bins_y = Angle([-1.5, 0., 1.5], 'radian')
+    bins_y = Angle([-1.5, 0., 1.5], 'degree')
+    wcs = make_linear_wcs_from_bin_edges_arrays("X", "Y", bins_x, bins_y)
+    wcs_header = wcs.to_header()
+    print(repr(wcs_header))
+    print()
+    print("Testing recover bins")
+    nbins_x = len(bins_x) - 1
+    nbins_y = len(bins_y) - 1
+    reco_bins_x, reco_bins_y = make_linear_bin_edges_arrays_from_wcs(wcs,
+                                                                     nbins_x,
+                                                                     nbins_y)
+    print(repr(reco_bins_x))
+    print(repr(reco_bins_y))
+    # to deeply test the translation of the bin reconstruction, use this in the wcs creation function:
+    #w.wcs.crpix = [10, 15] # smthg different from origin (0.5, 0.5) !!!
+    # test: reconstructed bins should match original bins
+    assert_allclose(reco_bins_x, bins_x)
+    assert_allclose(reco_bins_y, bins_y)
 
     # TODO: test also read_image and write_image
     outfile = 'bg_model_image.fits'
