@@ -20,7 +20,7 @@ def test_filter_observations():
     print()
     print("Test apply mask in zenith angle:")
     zenith_min = Angle(20., 'degree')
-    zenith_max = Angle(40., 'degree')
+    zenith_max = Angle(30., 'degree')
     zenith = Angle(90., 'degree') - obs_table['ALT']
     zenith_mask = (zenith_min <= zenith) & (zenith < zenith_max)
     filtered_obs_table = obs_table[zenith_mask]
@@ -96,12 +96,12 @@ def test_filter_observations():
     print()
     print("Test box selection in ALT")
     variable = 'ALT'
-    #value_min = 70.
-    #value_max = 80.
-    #value_min = Angle(70., 'degree')
-    #value_max = Angle(80., 'degree')
-    value_min = Angle(Angle(70., 'degree').radian, 'radian')
-    value_max = Angle(Angle(80., 'degree').radian, 'radian')
+    #value_min = 60.
+    #value_max = 70.
+    value_min = Angle(60., 'degree')
+    value_max = Angle(70., 'degree')
+    #value_min = Angle(60., 'degree').to('radian')
+    #value_max = Angle(70., 'degree').to('radian')
     selection = dict(shape='box', variable=variable,
                      value_min=value_min, value_max=value_max)
     filtered_obs_table = obs_table.filter_observations(selection)
