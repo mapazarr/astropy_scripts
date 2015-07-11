@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 from astropy.units import Quantity
 from astropy.coordinates import Angle
 from gammapy.background import CubeBackgroundModel
-from gammapy.background import make_linear_bin_edges_arrays_from_wcs, make_linear_wcs_from_bin_edges_arrays
+from gammapy.utils.wcs import (make_linear_bin_edges_arrays_from_wcs,
+                               make_linear_wcs_from_bin_edges_arrays)
 from gammapy import datasets
 from gammapy_bg_models_utilities import CubeBackgroundModelUtils as CBMutils
 
@@ -80,7 +81,6 @@ def gammapy_tests():
         print("bg_cube_model.background.shape", bg_cube_model.background.shape)
         print("len(bg_cube_model.background.shape)", len(bg_cube_model.background.shape))
         assert len(bg_cube_model.background.shape) == 3
-        #import IPython; IPython.embed()
 
     # test image plot:
     # test bg rate values plotted for image plot of energy bin conaining E = 2 TeV
