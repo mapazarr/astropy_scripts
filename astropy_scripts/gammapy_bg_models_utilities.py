@@ -21,6 +21,8 @@ class CubeBackgroundModelUtils():
 
         Parameters
         ----------
+        bg_model : `~gammapy.background.CubeBackgroundModel`
+            cube bg model object to plot
         energy : `~astropy.units.Quantity`, optional
                 energy of bin to plot the bg model
 
@@ -31,8 +33,8 @@ class CubeBackgroundModelUtils():
             selected energy value (if any), optional
         axes : `~matplotlib.axes.Axes`
             axes of the figure, optional
-        image : !!!!!!!!!!!!
-            !!!!!!!!!!!!!!!!, optional(??!!)
+        image : `~matplotlib.image.AxesImage`
+            image of the figure, optional
         """
         import matplotlib.pyplot as plt
         from matplotlib.colors import LogNorm
@@ -150,7 +152,7 @@ class CubeBackgroundModelUtils():
         if do_only_1_plot:
             return fig, axes, image
 
-    def plot_spectra(bg_model, det=None):
+    def plot_spectra(bg_model, format=None, det=None):
         """Plot spectra for each spatial (X, Y) bin.
 
         Save images in files: several canvases with a few images
@@ -160,8 +162,14 @@ class CubeBackgroundModelUtils():
         specified value. If no det is specified, no figure is
         returned, since it would be very memory consuming.
 
+        TODO: more BLABLA ABOUT FORMATS ACCEPTED!!!
+
         Parameters
         ----------
+        bg_model : `~gammapy.background.CubeBackgroundModel`
+            cube bg model object to plot
+        format : `~string`, optional
+            format for the plots
         det : `~astropy.units.Quantity`, optional
             det (X,Y) pair of bin to plot the bg model
 
@@ -172,8 +180,8 @@ class CubeBackgroundModelUtils():
             selected det (X,Y) pair (if any), optional
         axes : `~matplotlib.axes.Axes`
             axes of the figure, optional
-        image : !!!!!!!!!!!!
-            !!!!!!!!!!!!!!!!, optional(??!!)
+        image : `~matplotlib.image.AxesImage`
+            image of the figure, optional
         """
         import matplotlib.pyplot as plt
 
@@ -189,6 +197,15 @@ class CubeBackgroundModelUtils():
             else:
                 print("Reqested plot only for 1 det: {}".format(det))
                 do_only_1_plot = True
+
+        # check format
+        valid_formats = ['mosaic', 'stack']
+        if do_only_1_plot:
+            format = None
+        else:
+            if format not in valid_formats:
+                raise ValueError("Format {} not understood!".format(format))
+        TODO: implement format support (and implement stacking!!!!)
 
         n_det_bins_x = len(bg_model.detx_bins) - 1
         n_det_bins_y = len(bg_model.dety_bins) - 1
