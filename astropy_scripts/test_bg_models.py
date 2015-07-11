@@ -9,6 +9,7 @@ from astropy.coordinates import Angle
 from gammapy.background import CubeBackgroundModel
 from gammapy.background import make_linear_bin_edges_arrays_from_wcs, make_linear_wcs_from_bin_edges_arrays
 from gammapy import datasets
+from gammapy_bg_models_utilities import CubeBackgroundModelUtils as CBMutils
 
 GRAPH_DEBUG = 0
 USE_TEMP_FILES = 0
@@ -26,25 +27,29 @@ def plot_example():
 
     bg_model = CubeBackgroundModel.read(filename, format='bin_table')
 
-    bg_model.plot_images()
-    #bg_model.plot_images(energy=Quantity(1., 'TeV'))
-    bg_model.plot_images(energy=Quantity(2., 'TeV'))
-    #bg_model.plot_images(energy=Quantity(3., 'TeV'))
-    #bg_model.plot_images(energy=Quantity(1.53216636, 'TeV'))
-    #bg_model.plot_images(energy=Quantity(2.27553916, 'TeV'))
-    #bg_model.plot_images(energy=Quantity(80., 'TeV'))
-    #bg_model.plot_images(energy=Quantity([1.], 'TeV'))
-    #bg_model.plot_images(energy=Quantity([2.], 'TeV'))
-    #bg_model.plot_images(energy=Quantity([1., 2.], 'TeV'))
+    ##bg_model.plot_images() # old code
+    CBMutils.plot_images(bg_model)
+    CBMutils.plot_images(bg_model, energy=Quantity(2., 'TeV'))
+    #bg_model.plot_image(energy=Quantity(1., 'TeV'))
+    bg_model.plot_image(energy=Quantity(2., 'TeV'))
+    #bg_model.plot_image(energy=Quantity(3., 'TeV'))
+    #bg_model.plot_image(energy=Quantity(1.53216636, 'TeV'))
+    #bg_model.plot_image(energy=Quantity(2.27553916, 'TeV'))
+    #bg_model.plot_image(energy=Quantity(80., 'TeV'))
+    #bg_model.plot_image(energy=Quantity([1.], 'TeV'))
+    #bg_model.plot_image(energy=Quantity([2.], 'TeV'))
+    #bg_model.plot_image(energy=Quantity([1., 2.], 'TeV'))
 
-    bg_model.plot_spectra()
-    bg_model.plot_spectra(det=Angle([0., 0.], 'degree'))
-    #bg_model.plot_spectra(det=Angle([0., 2.], 'degree'))
-    #bg_model.plot_spectra(det=Angle([-5., 0.], 'degree'))
-    #bg_model.plot_spectra(det=Angle([0., -5.], 'degree'))
-    #bg_model.plot_spectra(det=Angle([-5., -5.], 'degree'))
-    #bg_model.plot_spectra(det=Angle([[0., 0.]], 'degree'))
-    #bg_model.plot_spectra(det=Angle([[0., 0.], [1., 1.]], 'degree'))
+    ##bg_model.plot_spectra() # old code
+    CBMutils.plot_spectra(bg_model)
+    CBMutils.plot_spectra(bg_model, det=Angle([0., 0.], 'degree'))
+    bg_model.plot_spectrum(det=Angle([0., 0.], 'degree'))
+    #bg_model.plot_spectrum(det=Angle([0., 2.], 'degree'))
+    #bg_model.plot_spectrum(det=Angle([-5., 0.], 'degree'))
+    #bg_model.plot_spectrum(det=Angle([0., -5.], 'degree'))
+    #bg_model.plot_spectrum(det=Angle([-5., -5.], 'degree'))
+    #bg_model.plot_spectrum(det=Angle([[0., 0.]], 'degree'))
+    #bg_model.plot_spectrum(det=Angle([[0., 0.], [1., 1.]], 'degree'))
 
     outfile = 'cube_background_model.fits'
     bg_model.write('image', outfile, clobber=True) # overwrite
@@ -76,10 +81,10 @@ def gammapy_tests():
         assert len(bg_cube_model.background.shape) == 3
         #import IPython; IPython.embed()
 
-    # test image plot: (OLD BORRAR!!!!)
+    # test image plot:
     # test bg rate values plotted for image plot of energy bin conaining E = 2 TeV
     energy = Quantity(2., 'TeV')
-    fig_image, ax_im, image_im = bg_cube_model.plot_images(energy)
+    fig_image, ax_im, image_im = bg_cube_model.plot_image(energy)
     plt.draw()
     if GRAPH_DEBUG:
         plt.show() # wait until image is closed
@@ -106,7 +111,7 @@ def gammapy_tests():
     # test bg rate values plotted for spectrum plot of detector bin conaining det (0, 0) deg (center)
     det = Angle([0., 0.], 'degree')
     #det = Angle([0., 2.], 'degree')
-    fig_spec, ax_spec, image_spec = bg_cube_model.plot_spectra(det)
+    fig_spec, ax_spec, image_spec = bg_cube_model.plot_spectrum(det)
     plt.draw()
     if GRAPH_DEBUG:
         plt.show() # wait until image is closed
@@ -171,6 +176,9 @@ def gammapy_tests():
     outfile = 'bg_model_image.fits'
     bg_cube_model.write('image', outfile, clobber=True) # overwrite
 
+    # TODO: inline comment in github to ask how to get image from axis object, and hence remove complexity of return of plot functions!!!
+
+    # TODO: test cubes/plots with asymmetric shape (x_bins != y_bins) !!!
 
     # TODO: clean up after tests (remove created files) !!!!!!!!!!!!!!!!!!!!!! (add option/flag to aventually keep them)
 
