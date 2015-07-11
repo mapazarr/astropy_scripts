@@ -52,7 +52,8 @@ def plot_example():
     #bg_model.plot_spectrum(det=Angle([[0., 0.], [1., 1.]], 'degree'))
 
     outfile = 'cube_background_model.fits'
-    bg_model.write('image', outfile, clobber=True) # overwrite
+    bg_model.write(outfile, format='image',
+                   write_kwargs=dict(clobber=True)) # overwrite
 
 
 def gammapy_tests():
@@ -137,7 +138,8 @@ def gammapy_tests():
     else:
         outfile = NamedTemporaryFile(suffix='.fits').name
     print("Writing file {}".format(outfile))
-    bg_cube_model.write('bin_table', outfile, clobber=True) # overwrite
+    bg_cube_model.write(outfile, format='bin_table',
+                        write_kwargs=dict(clobber=True)) # overwrite
     bg_model_2 = CubeBackgroundModel.read(outfile, format='bin_table')
     assert_allclose(bg_model_2.background.value,
                                    bg_model_1.background.value)
@@ -174,11 +176,16 @@ def gammapy_tests():
 
     # TODO: test also read_image and write_image
     outfile = 'bg_model_image.fits'
-    bg_cube_model.write('image', outfile, clobber=True) # overwrite
+    bg_cube_model.write(outfile, format='image',
+                        write_kwargs=dict(clobber=True)) # overwrite
 
     # TODO: inline comment in github to ask how to get image from axis object, and hence remove complexity of return of plot functions!!!
 
     # TODO: test cubes/plots with asymmetric shape (x_bins != y_bins) !!!
+
+    # TODO: doc for plots, example plots (revert read/write changes? -> no) !!!
+    #       my scripts: plot stack + clean code
+    #       review "use_plot_something.py"
 
     # TODO: clean up after tests (remove created files) !!!!!!!!!!!!!!!!!!!!!! (add option/flag to aventually keep them)
 
