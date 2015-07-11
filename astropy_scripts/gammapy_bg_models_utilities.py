@@ -205,7 +205,7 @@ class CubeBackgroundModelUtils():
         else:
             if format not in valid_formats:
                 raise ValueError("Format {} not understood!".format(format))
-        TODO: implement format support (and implement stacking!!!!)
+        # TODO: implement format support (and implement stacking!!!!)
 
         n_det_bins_x = len(bg_model.detx_bins) - 1
         n_det_bins_y = len(bg_model.dety_bins) - 1
