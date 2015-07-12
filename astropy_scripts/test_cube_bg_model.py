@@ -24,7 +24,7 @@ def plot_example():
     filename = '../test_datasets/background/bg_cube_model_test.fits'
     filename = datasets.get_path(filename, location='remote')
 
-    bg_model = CubeBackgroundModel.read(filename, format='bin_table')
+    bg_model = CubeBackgroundModel.read(filename, format='table')
 
     ##bg_model.plot_images() # old code
     CBMutils.plot_images(bg_model)
@@ -75,7 +75,7 @@ def gammapy_tests():
         print("filename: {}".format(filename))
         #filename = DIR + filename
         filename = datasets.get_path(filename, location='remote')
-        bg_cube_model = CubeBackgroundModel.read(filename, format='bin_table')
+        bg_cube_model = CubeBackgroundModel.read(filename, format='table')
         print("bg_cube_model.background.shape", bg_cube_model.background.shape)
         print("len(bg_cube_model.background.shape)", len(bg_cube_model.background.shape))
         assert len(bg_cube_model.background.shape) == 3
@@ -83,10 +83,12 @@ def gammapy_tests():
     # test image plot:
     # test bg rate values plotted for image plot of energy bin conaining E = 2 TeV
     energy = Quantity(2., 'TeV')
-    fig_image, ax_im, image_im = bg_cube_model.plot_image(energy)
+    ax_im = bg_cube_model.plot_image(energy)
     plt.draw()
     if GRAPH_DEBUG:
         plt.show() # wait until image is closed
+    # get plot data (stored in the image)
+    image_im = ax_im.get_images()[0]
     plot_data = image_im.get_array()
     # I need also the bin ids!!!
     plot_shape = image_im.get_array().shape
@@ -110,10 +112,11 @@ def gammapy_tests():
     # test bg rate values plotted for spectrum plot of detector bin conaining det (0, 0) deg (center)
     det = Angle([0., 0.], 'degree')
     #det = Angle([0., 2.], 'degree')
-    fig_spec, ax_spec, image_spec = bg_cube_model.plot_spectrum(det)
+    ax_spec = bg_cube_model.plot_spectrum(det)
     plt.draw()
     if GRAPH_DEBUG:
         plt.show() # wait until image is closed
+    # get plot data (stored in the line)
     plot_data = ax_spec.get_lines()[0].get_xydata()
     print("plot data")
     print(plot_data)
@@ -136,17 +139,17 @@ def gammapy_tests():
     else:
         outfile = NamedTemporaryFile(suffix='.fits').name
     print("Writing file {}".format(outfile))
-    bg_cube_model.write(outfile, format='bin_table',
+    bg_cube_model.write(outfile, format='table',
                         write_kwargs=dict(clobber=True)) # overwrite
-    bg_model_2 = CubeBackgroundModel.read(outfile, format='bin_table')
-    assert_allclose(bg_model_2.background.value,
-                                   bg_model_1.background.value)
-    assert_allclose(bg_model_2.detx_bins.value,
-                                   bg_model_1.detx_bins.value)
-    assert_allclose(bg_model_2.dety_bins.value,
-                                   bg_model_1.dety_bins.value)
-    assert_allclose(bg_model_2.energy_bins.value,
-                                   bg_model_1.energy_bins.value)
+    bg_model_2 = CubeBackgroundModel.read(outfile, format='table')
+    assert_allclose(bg_model_2.background,
+                    bg_model_1.background)
+    assert_allclose(bg_model_2.detx_bins,
+                    bg_model_1.detx_bins)
+    assert_allclose(bg_model_2.dety_bins,
+                    bg_model_1.dety_bins)
+    assert_allclose(bg_model_2.energy_bins,
+                    bg_model_1.energy_bins)
 
     # TODO: test also read_image and write_image
     outfile = 'bg_model_image.fits'
