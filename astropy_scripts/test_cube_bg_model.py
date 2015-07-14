@@ -12,6 +12,8 @@ from gammapy_bg_models_utilities import CubeBackgroundModelUtils as CBMutils
 
 GRAPH_DEBUG = 0
 USE_TEMP_FILES = 0
+CACHE = 1 # set to 0 to ignore downloaded files in the cache
+          # (or use rm ~/.astropy/cache)
 
 def plot_example(filename):
     """Plot background model and store as cube so that it can viewed with ds9.
@@ -123,7 +125,7 @@ def gammapy_tests(filename):
     assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins)
     assert_allclose(bg_model_2.energy_bins, bg_model_1.energy_bins)
 
-    # test read_image and write_image
+    # test read/write image file
     if not USE_TEMP_FILES:
         outfile = 'bg_model_image.fits'
     else:
@@ -133,52 +135,15 @@ def gammapy_tests(filename):
                         write_kwargs=dict(clobber=True)) # overwrite
     # test: this function should produce:
     #  - a file exactly as the other method
-    #  - a cube exactly as the other method (once the file is read with the read function) -> this is rather a test for read!!!!!!!!!!
+    #  - a cube exactly as the other method (once the file is read with the read function)
 
     # test if values are correct in the saved file: compare both files
-    import IPython; IPython.embed()
     bg_model_1 = bg_cube_model
     bg_model_2 = CubeBackgroundModel.read(outfile, format='image')
     assert_allclose(bg_model_2.background, bg_model_1.background)
-    print("x: 1", bg_model_1.detx_bins.shape, repr(bg_model_1.detx_bins))
-    print("x: 2", bg_model_2.detx_bins.shape, repr(bg_model_2.detx_bins))
-    
-    print("x: 2 - 1 =", repr(bg_model_2.detx_bins - bg_model_1.detx_bins))
-    print("y: 1", bg_model_1.dety_bins.shape, repr(bg_model_1.dety_bins))
-    print("y: 2", bg_model_2.dety_bins.shape, repr(bg_model_2.dety_bins))
-    
-    print("y: 2 - 1 =", repr(bg_model_2.dety_bins - bg_model_1.dety_bins))
-    ##el mio tiene valor central 0 (esperable en int. simetrico con numero par de bines (impar de fronteras de bines) y el otro no!!!!
-    ## el otro tiene un valor raro "-3.43774676" intermedio en un bin !!!!!!
-    ##check with file from mi mayer!!!! -> problem with units!!! -> works (if units are correctly parsed)
-    ##  -> try to fix mi mayer's code to adopt valid FITS units
-    ##ref: http://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/general/ogip_93_001/
-    ##well, actually it is valid (but not especially recommended), but astropy won't read it
-    ##  "the number of spaces between individual unit sub-strings is left a matter for personal preference"
-    ##  -> try to check how units are read in gammalib/ctools
-    ##  -> try to make a general "read bg units" function??!!!
-    ##if it works: try to "fix" the test file?or make a new one? (I'd need a bg data faker)!!!
-    assert_allclose(bg_model_2.detx_bins.value, bg_model_1.detx_bins.value, rtol=1e-2)
-    assert_allclose(bg_model_2.detx_bins.value, bg_model_1.detx_bins.value)
     assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins)
     assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins)
-    #np.testing.assert_almost_equal(bg_model_2.detx_bins, bg_model_1.detx_bins)
-    np.testing.assert_almost_equal(bg_model_2.detx_bins.value, bg_model_1.detx_bins.value)
-    np.testing.assert_almost_equal(bg_model_2.dety_bins.value, bg_model_1.dety_bins.value)
-    #assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=1e-5, atol=1)
-    #assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=1e-5, atol=1)
-    #assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=1e-2)
-    #assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=1e-2)
-    #assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=0.5)
-    #assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=0.5)
-    #assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=5.)
-    #assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=5.)
-    assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=1.) # everything below rtol=1 fails!!!
-    assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=1.) # everything below rtol=1 fails!!!
-    #assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=0.9)
-    #assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=0.9)
     assert_allclose(bg_model_2.energy_bins, bg_model_1.energy_bins)
-
 
     # TODO: test cubes/plots with asymmetric shape (x_bins != y_bins) !!!
 
@@ -204,7 +169,7 @@ def test_remote_data():
     # test remote path
     # checks (remotely) in gammapy/gammapy-extra/datasets
     print()
-    remote_path = datasets.get_path('vela_region/counts_vela.fits', location='remote')
+    remote_path = datasets.get_path('vela_region/counts_vela.fits', location='remote', cache=CACHE)
     print("remote_path", remote_path)
 
     # test local path
@@ -218,8 +183,8 @@ def test_remote_data():
     # test remote path
     print()
     # checks (remotely) in gammapy/gammapy-extra/datasets
-    #remote_path = datasets.get_path('bg_cube_model_test.fits', location='remote')
-    remote_path = datasets.get_path('../test_datasets/background/bg_cube_model_test.fits', location='remote')
+    #remote_path = datasets.get_path('bg_cube_model_test.fits', location='remote', cache=CACHE)
+    remote_path = datasets.get_path('../test_datasets/background/bg_cube_model_test.fits', location='remote', cache=CACHE)
     print("remote_path", remote_path)
 
 
@@ -233,11 +198,13 @@ if __name__ == '__main__':
     filename = DIR + 'hist_alt3_az0.fits.gz'
     #filenames.append(filename)
 
-    DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
-    filename = DIR + 'bg_test.fits'
+    #DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
+    #filename = DIR + 'bg_test.fits'
     #filename = DIR + 'bkgcube.fits' # not supported!
-    #filename = '../test_datasets/background/bg_cube_model_test.fits'
-    #filename = datasets.get_path(filename, location='remote')
+    filename = '../test_datasets/background/bg_cube_model_test.fits'
+    filename = datasets.get_path(filename, location='remote', cache=CACHE)
+    #DIR = '/home/mapaz/astropy/development_code/gammapy-extra/test_datasets/background/'
+    #filename = DIR + 'bg_cube_model_test.fits'
     filenames.append(filename)
 
     for filename in filenames:
