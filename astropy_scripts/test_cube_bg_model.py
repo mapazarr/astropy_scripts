@@ -213,8 +213,8 @@ if __name__ == '__main__':
         print("filename: {}".format(filename))
 
         # call tests
-        plot_example(filename)
-        #gammapy_tests(filename)
+        #plot_example(filename) # takes long! (many plots/files created!)
+        gammapy_tests(filename)
 
     # call tests
     #test_remote_data()

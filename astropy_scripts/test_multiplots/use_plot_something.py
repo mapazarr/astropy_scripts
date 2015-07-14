@@ -90,19 +90,12 @@ plt.draw()
 if GRAPH_DEBUG:
     plt.show() # wait until image is closed
 
-
-
 # example 5: plot all images (i.e. one image per energy slice) in bg cube
 
-
-
-
+# see ../gammapy_bg_models_utilities.py plot_examples
 
 # example 6: plot all spectra (i.e. one spectrum per det (X, Y) bin) in bg cube
 
-
-
-
-
+# see ../gammapy_bg_models_utilities.py plot_examples
 
 plt.show() #don't quit at the end

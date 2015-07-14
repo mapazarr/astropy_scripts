@@ -88,32 +88,7 @@ class CubeBackgroundModelUtils():
                 ax = axes
             else:
                 ax = axes.flat[count_pads - 1]
-            #fig, ax, image = bg_model.plot_image(energy_bin_centers[ii])
-            #fig_bla, ax_bla, image = bg_model.plot_image(energy_bin_centers[ii], save=False)
-            ####fig_bla, ax_bla, image = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            #fig_bla, ax, image = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            #fig, ax, image = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            #fig_bla, ax_bla, image_bla = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            ###############fig_bla, ax_bla, image = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            #fig, ax, image = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            ###############fig_bla, ax, image = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            #ax, image = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            #ax = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            ###############fig_dummy, ax, image = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            ##(#0#)##fig_dummy, ax, image = bg_model.plot_image(energy_bin_center, ax, save=False)
             ax = bg_model.plot_image(energy_bin_center, ax)
-            #TODO: check this
-            #http://nbviewer.ipython.org/gist/cdeil/6a2b33715fe47408587c
-            #and try to get rid of fig and image as outputs of the plot_image function!!!!!!!!!!!! (without breaking the tests of course) (or should I add them as input pars also like for the axes?!!!)
-            #also, try to get rid of the extra (empty?) plots shown when calling this function for only 1 plot!!!! -> first understand them: where do they come from? (from do 1 plot or from do many plots???!!!!) -> they are created (i think) because of passing the fig object, and it's empty (i think) because i use the axis in a new fig
-            #also, get rid of the 1 plot option at some point!!!! -> de momento no
-            #do the same tricks as here in plot_spectra!!!!!!!!!!
-            #image = ax.imshow(data.value,
-            #                  extent=extent.value,
-            #                  origin='lower', # do not invert image
-            #                  interpolation='nearest',
-            #                  norm=LogNorm(), # color log scale
-            #                  cmap='afmhot')
 
             if do_only_1_plot:
                 ax.set_title('Energy = [{0:.1f}, {1:.1f}) {2}'.format(energy_bin_edges[0].value,
@@ -121,11 +96,6 @@ class CubeBackgroundModelUtils():
                                                                       energy_bin_edges.unit))
             else:
                 ax.set_title('Energy = {:.1f}'.format(energy_bin_center))
-###            ax.set_xlabel('X / {}'.format(extent.unit))
-###            ax.set_ylabel('Y / {}'.format(extent.unit))
-###            divider = make_axes_locatable(ax)
-###            cax = divider.append_axes("right", size="5%", pad=0.05)
-###            fig.colorbar(image, cax=cax, label='Bg rate / {}'.format(data.unit))
 
             count_pads += 1 # increase
 
@@ -258,15 +228,10 @@ class CubeBackgroundModelUtils():
                     ax = axes
                 else:
                     ax = axes.flat[count_pads - 1]
-                #fig_dummy, ax, image = bg_model.plot_spectrum(detx_bin_center, dety_bin_center, ax, save=False)
-                #fig_dummy, ax, image = bg_model.plot_spectrum([detx_bin_center, dety_bin_center], ax, save=False)
                 ss_det_bin_center = "({0:.1f}, {1:.1f})".format(detx_bin_center, dety_bin_center)
                 ss_label = 'Det = {}'.format(ss_det_bin_center)
                 ax = bg_model.plot_spectrum(det_bin_center, ax,
                                             style_kwargs=dict(label=ss_label))
-                #image = ax.plot(energy_points.to('TeV'), data,
-                #                drawstyle='default') # connect points with lines
-                #ax.loglog() # double log scale # slow!
                 if do_only_1_plot:
                     ss_detx_bin_edges = "[{0:.1f}, {1:.1f}) {2}".format(det_bin_edges[0].value,
                                                                         det_bin_edges[1].value,
@@ -281,8 +246,6 @@ class CubeBackgroundModelUtils():
                         ax.set_title('')
                     else:
                         ax.set_title(ss_label)
-###                ax.set_xlabel('E / {}'.format(energy_points.unit))
-###                ax.set_ylabel('Bg rate / {}'.format(data.unit))
                 count_pads += 1 # increase
 
                 if count_pads > npads_per_canvas or count_images == nimages:
