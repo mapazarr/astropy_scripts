@@ -5,8 +5,11 @@ from numpy.testing import assert_allclose
 from gammapy.background import CubeBackgroundModel
 from gammapy import datasets
 
+CACHE = 1 # set to 0 to ignore downloaded files in the cache
+          # (or use rm ~/.astropy/cache)
+
 filename = '../test_datasets/background/bg_cube_model_test.fits'
-filename = datasets.get_path(filename, location='remote')
+filename = datasets.get_path(filename, location='remote', cache=CACHE)
 bg_model_1 = CubeBackgroundModel.read(filename, format='table')
 
 outfile = NamedTemporaryFile(suffix='.fits').name
