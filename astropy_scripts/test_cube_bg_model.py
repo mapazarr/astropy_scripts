@@ -13,17 +13,9 @@ from gammapy_bg_models_utilities import CubeBackgroundModelUtils as CBMutils
 GRAPH_DEBUG = 0
 USE_TEMP_FILES = 0
 
-def plot_example():
+def plot_example(filename):
     """Plot background model and store as cube so that it can viewed with ds9.
     """
-    ###DIR = '/Users/deil/work/_Data/hess/HESSFITS/pa/Model_Deconvoluted_Prod26/Mpp_Std/background/'
-    ##DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
-    ##filename = DIR + 'hist_alt3_az0.fits.gz'
-    #DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
-    #filename = DIR + 'bg_test.fits'
-    filename = '../test_datasets/background/bg_cube_model_test.fits'
-    filename = datasets.get_path(filename, location='remote')
-
     bg_model = CubeBackgroundModel.read(filename, format='table')
 
     ##bg_model.plot_images() # old code
@@ -55,30 +47,14 @@ def plot_example():
                    write_kwargs=dict(clobber=True)) # overwrite
 
 
-def gammapy_tests():
+def gammapy_tests(filename):
     """Testing the tests for gammapy.
     """
     # test shape of bg cube when reading a file
-    #DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
-    ##filenames = ['bg_test.fits', 'bkgcube.fits']
-    ## WARNING! bkgcube.fits has a different format:
-    ## I think it's projected bg model in RA dec!!!
-    ## (maybe we need an extra class for this?!!!)
-    #filenames = ['bg_test.fits']
-    ##DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
-    ##filenames = ['hist_alt3_az0.fits.gz']
-    ## TODO: intentar hacerlo con las IRFs de CTA: !!!!!!!
-    ## https://github.com/gammapy/gammapy/issues/267
-    filenames = ['../test_datasets/background/bg_cube_model_test.fits']
-    for filename in filenames:
-        print()
-        print("filename: {}".format(filename))
-        #filename = DIR + filename
-        filename = datasets.get_path(filename, location='remote')
-        bg_cube_model = CubeBackgroundModel.read(filename, format='table')
-        print("bg_cube_model.background.shape", bg_cube_model.background.shape)
-        print("len(bg_cube_model.background.shape)", len(bg_cube_model.background.shape))
-        assert len(bg_cube_model.background.shape) == 3
+    bg_cube_model = CubeBackgroundModel.read(filename, format='table')
+    print("bg_cube_model.background.shape", bg_cube_model.background.shape)
+    print("len(bg_cube_model.background.shape)", len(bg_cube_model.background.shape))
+    assert len(bg_cube_model.background.shape) == 3
 
     # test image plot:
     # test bg rate values plotted for image plot of energy bin conaining E = 2 TeV
@@ -142,21 +118,67 @@ def gammapy_tests():
     bg_cube_model.write(outfile, format='table',
                         write_kwargs=dict(clobber=True)) # overwrite
     bg_model_2 = CubeBackgroundModel.read(outfile, format='table')
-    assert_allclose(bg_model_2.background,
-                    bg_model_1.background)
-    assert_allclose(bg_model_2.detx_bins,
-                    bg_model_1.detx_bins)
-    assert_allclose(bg_model_2.dety_bins,
-                    bg_model_1.dety_bins)
-    assert_allclose(bg_model_2.energy_bins,
-                    bg_model_1.energy_bins)
+    assert_allclose(bg_model_2.background, bg_model_1.background)
+    assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins)
+    assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins)
+    assert_allclose(bg_model_2.energy_bins, bg_model_1.energy_bins)
 
-    # TODO: test also read_image and write_image
-    outfile = 'bg_model_image.fits'
+    # test read_image and write_image
+    if not USE_TEMP_FILES:
+        outfile = 'bg_model_image.fits'
+    else:
+        outfile = NamedTemporaryFile(suffix='.fits').name
+    print("Writing file {}".format(outfile))
     bg_cube_model.write(outfile, format='image',
                         write_kwargs=dict(clobber=True)) # overwrite
+    # test: this function should produce:
+    #  - a file exactly as the other method
+    #  - a cube exactly as the other method (once the file is read with the read function) -> this is rather a test for read!!!!!!!!!!
 
-    # TODO: inline comment in github to ask how to get image from axis object, and hence remove complexity of return of plot functions!!!
+    # test if values are correct in the saved file: compare both files
+    import IPython; IPython.embed()
+    bg_model_1 = bg_cube_model
+    bg_model_2 = CubeBackgroundModel.read(outfile, format='image')
+    assert_allclose(bg_model_2.background, bg_model_1.background)
+    print("x: 1", bg_model_1.detx_bins.shape, repr(bg_model_1.detx_bins))
+    print("x: 2", bg_model_2.detx_bins.shape, repr(bg_model_2.detx_bins))
+    
+    print("x: 2 - 1 =", repr(bg_model_2.detx_bins - bg_model_1.detx_bins))
+    print("y: 1", bg_model_1.dety_bins.shape, repr(bg_model_1.dety_bins))
+    print("y: 2", bg_model_2.dety_bins.shape, repr(bg_model_2.dety_bins))
+    
+    print("y: 2 - 1 =", repr(bg_model_2.dety_bins - bg_model_1.dety_bins))
+    ##el mio tiene valor central 0 (esperable en int. simetrico con numero par de bines (impar de fronteras de bines) y el otro no!!!!
+    ## el otro tiene un valor raro "-3.43774676" intermedio en un bin !!!!!!
+    ##check with file from mi mayer!!!! -> problem with units!!! -> works (if units are correctly parsed)
+    ##  -> try to fix mi mayer's code to adopt valid FITS units
+    ##ref: http://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/general/ogip_93_001/
+    ##well, actually it is valid (but not especially recommended), but astropy won't read it
+    ##  "the number of spaces between individual unit sub-strings is left a matter for personal preference"
+    ##  -> try to check how units are read in gammalib/ctools
+    ##  -> try to make a general "read bg units" function??!!!
+    ##if it works: try to "fix" the test file?or make a new one? (I'd need a bg data faker)!!!
+    assert_allclose(bg_model_2.detx_bins.value, bg_model_1.detx_bins.value, rtol=1e-2)
+    assert_allclose(bg_model_2.detx_bins.value, bg_model_1.detx_bins.value)
+    assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins)
+    assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins)
+    #np.testing.assert_almost_equal(bg_model_2.detx_bins, bg_model_1.detx_bins)
+    np.testing.assert_almost_equal(bg_model_2.detx_bins.value, bg_model_1.detx_bins.value)
+    np.testing.assert_almost_equal(bg_model_2.dety_bins.value, bg_model_1.dety_bins.value)
+    #assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=1e-5, atol=1)
+    #assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=1e-5, atol=1)
+    #assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=1e-2)
+    #assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=1e-2)
+    #assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=0.5)
+    #assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=0.5)
+    #assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=5.)
+    #assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=5.)
+    assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=1.) # everything below rtol=1 fails!!!
+    assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=1.) # everything below rtol=1 fails!!!
+    #assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins, rtol=0.9)
+    #assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins, rtol=0.9)
+    assert_allclose(bg_model_2.energy_bins, bg_model_1.energy_bins)
+
 
     # TODO: test cubes/plots with asymmetric shape (x_bins != y_bins) !!!
 
@@ -202,6 +224,29 @@ def test_remote_data():
 
 
 if __name__ == '__main__':
-    #plot_example()
-    gammapy_tests()
+
+    # create a list of files to test
+    filenames = []
+
+    ###DIR = '/Users/deil/work/_Data/hess/HESSFITS/pa/Model_Deconvoluted_Prod26/Mpp_Std/background/'
+    DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
+    filename = DIR + 'hist_alt3_az0.fits.gz'
+    #filenames.append(filename)
+
+    DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
+    filename = DIR + 'bg_test.fits'
+    #filename = DIR + 'bkgcube.fits' # not supported!
+    #filename = '../test_datasets/background/bg_cube_model_test.fits'
+    #filename = datasets.get_path(filename, location='remote')
+    filenames.append(filename)
+
+    for filename in filenames:
+        print()
+        print("filename: {}".format(filename))
+
+        # call tests
+	#plot_example(filename)
+        gammapy_tests(filename)
+
+    # call tests
     #test_remote_data()
