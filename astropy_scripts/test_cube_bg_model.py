@@ -34,7 +34,8 @@ def plot_example(filename):
     #bg_model.plot_image(energy=Quantity([1., 2.], 'TeV'))
 
     ##bg_model.plot_spectra() # old code
-    CBMutils.plot_spectra(bg_model)
+    CBMutils.plot_spectra(bg_model, format='mosaic')
+    CBMutils.plot_spectra(bg_model, format='stack')
     CBMutils.plot_spectra(bg_model, det=Angle([0., 0.], 'degree'))
     bg_model.plot_spectrum(det=Angle([0., 0.], 'degree'))
     #bg_model.plot_spectrum(det=Angle([0., 2.], 'degree'))
@@ -212,8 +213,8 @@ if __name__ == '__main__':
         print("filename: {}".format(filename))
 
         # call tests
-	#plot_example(filename)
-        gammapy_tests(filename)
+        plot_example(filename)
+        #gammapy_tests(filename)
 
     # call tests
     #test_remote_data()

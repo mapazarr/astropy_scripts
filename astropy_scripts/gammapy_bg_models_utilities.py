@@ -28,13 +28,9 @@ class CubeBackgroundModelUtils():
 
         Returns
         -------
-        fig : `~matplotlib.figure.Figure`
-            figure with image of bin of the bg model for the
-            selected energy value (if any), optional
         axes : `~matplotlib.axes.Axes`
-            axes of the figure, optional
-        image : `~matplotlib.image.AxesImage`
-            image of the figure, optional
+            axes of the figure with image of bin of the bg model
+            for the selected energy value (if any), optional
         """
         import matplotlib.pyplot as plt
         from matplotlib.colors import LogNorm
@@ -68,7 +64,7 @@ class CubeBackgroundModelUtils():
         count_pads = 1
 
         extent = bg_model.image_extent
-        energy_bin_centers = bg_model.spectrum_bin_centers
+        energy_bin_centers = bg_model.energy_bin_centers
         if do_only_1_plot:
             # find energy bin containing the specified energy
             energy_bin, energy_bin_edges = bg_model.find_energy_bin(energy)
@@ -104,7 +100,8 @@ class CubeBackgroundModelUtils():
             #ax, image = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
             #ax = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
             ###############fig_dummy, ax, image = bg_model.plot_image(energy_bin_centers[ii], ax, save=False)
-            fig_dummy, ax, image = bg_model.plot_image(energy_bin_center, ax, save=False)
+            ##(#0#)##fig_dummy, ax, image = bg_model.plot_image(energy_bin_center, ax, save=False)
+            ax = bg_model.plot_image(energy_bin_center, ax)
             #TODO: check this
             #http://nbviewer.ipython.org/gist/cdeil/6a2b33715fe47408587c
             #and try to get rid of fig and image as outputs of the plot_image function!!!!!!!!!!!! (without breaking the tests of course) (or should I add them as input pars also like for the axes?!!!)
@@ -150,7 +147,7 @@ class CubeBackgroundModelUtils():
             count_images += 1 # increase
 
         if do_only_1_plot:
-            return fig, axes, image
+            return axes
 
     def plot_spectra(bg_model, format=None, det=None):
         """Plot spectra for each spatial (X, Y) bin.
@@ -162,7 +159,12 @@ class CubeBackgroundModelUtils():
         specified value. If no det is specified, no figure is
         returned, since it would be very memory consuming.
 
-        TODO: more BLABLA ABOUT FORMATS ACCEPTED!!!
+        Several plotting formats are accepted, depending on the value
+        of the `format` parameter:
+
+            * `mosaic`: mosaic of figures with several pads per figure
+
+            * `stack`: 1 plot with several curves on the same axis
 
         Parameters
         ----------
@@ -175,13 +177,9 @@ class CubeBackgroundModelUtils():
 
         Returns
         -------
-        fig : `~matplotlib.figure.Figure`
-            figure with image of bin of the bg model for the
-            selected det (X,Y) pair (if any), optional
         axes : `~matplotlib.axes.Axes`
-            axes of the figure, optional
-        image : `~matplotlib.image.AxesImage`
-            image of the figure, optional
+            axes of the figure with image of bin of the bg model
+            for the selected det (X,Y) pair (if any), optional
         """
         import matplotlib.pyplot as plt
 
@@ -204,8 +202,7 @@ class CubeBackgroundModelUtils():
             format = None
         else:
             if format not in valid_formats:
-                raise ValueError("Format {} not understood!".format(format))
-        # TODO: implement format support (and implement stacking!!!!)
+                raise ValueError("Plot format {} not understood!".format(format))
 
         n_det_bins_x = len(bg_model.detx_bins) - 1
         n_det_bins_y = len(bg_model.dety_bins) - 1
@@ -215,6 +212,11 @@ class CubeBackgroundModelUtils():
         if do_only_1_plot:
             n_det_bins = n_det_bins_x = n_det_bins_y = nimages = ncols = nrows = 1
         npads_per_canvas = ncols*nrows
+        if format == 'stack':
+            # reset ncols and nrows
+            # npads_per_canvas will be used as number of curves per
+            # canvas (or pad, since there is only 1 pad per canvas)
+            ncols = nrows = 1
 
         fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
         fig.set_size_inches(25., 25., forward=True)
@@ -222,7 +224,7 @@ class CubeBackgroundModelUtils():
         count_canvases = 1
         count_pads = 1
 
-        energy_points = bg_model.spectrum_bin_centers
+        energy_points = bg_model.energy_bin_centers
         det_bin_centers = bg_model.image_bin_centers
         if do_only_1_plot:
             # find det bin containing the specified det coordinates
@@ -251,14 +253,17 @@ class CubeBackgroundModelUtils():
                 det_bin_center = Angle([detx_bin_center, dety_bin_center])
                 print ("  image({}) canvas({}) pad({})".format(count_images, count_canvases, count_pads))
 
-                if do_only_1_plot:
+                if do_only_1_plot or format == 'stack':
                     fig.set_size_inches(8., 8., forward=True)
                     ax = axes
                 else:
                     ax = axes.flat[count_pads - 1]
                 #fig_dummy, ax, image = bg_model.plot_spectrum(detx_bin_center, dety_bin_center, ax, save=False)
                 #fig_dummy, ax, image = bg_model.plot_spectrum([detx_bin_center, dety_bin_center], ax, save=False)
-                fig_dummy, ax, image = bg_model.plot_spectrum(det_bin_center, ax, save=False)
+                ss_det_bin_center = "({0:.1f}, {1:.1f})".format(detx_bin_center, dety_bin_center)
+                ss_label = 'Det = {}'.format(ss_det_bin_center)
+                ax = bg_model.plot_spectrum(det_bin_center, ax,
+                                            style_kwargs=dict(label=ss_label))
                 #image = ax.plot(energy_points.to('TeV'), data,
                 #                drawstyle='default') # connect points with lines
                 #ax.loglog() # double log scale # slow!
@@ -272,8 +277,10 @@ class CubeBackgroundModelUtils():
 
                     ax.set_title('Det = {0} {1}'.format(ss_detx_bin_edges, ss_dety_bin_edges))
                 else:
-                    ss_det_bin_center = "({0:.1f}, {1:.1f})".format(detx_bin_center, dety_bin_center)
-                    ax.set_title('Det = {}'.format(ss_det_bin_center))
+                    if format == 'stack':
+                        ax.set_title('')
+                    else:
+                        ax.set_title(ss_label)
 ###                ax.set_xlabel('E / {}'.format(energy_points.unit))
 ###                ax.set_ylabel('Bg rate / {}'.format(data.unit))
                 count_pads += 1 # increase
@@ -285,17 +292,22 @@ class CubeBackgroundModelUtils():
                                                                                            det.value[1],
                                                                                            det.unit)
                     else:
-                        filename = "cube_background_model_spectra{}.png".format(count_canvases)
+                        if format == 'stack':
+                            ax.legend()
+                        filename = "cube_background_model_spectra_{0}{1}.png".format(format, count_canvases)
                     print('Writing {}'.format(filename))
                     fig.savefig(filename)
                     if not do_only_1_plot:
                         plt.close('all') # close all open figures
                         fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
-                        fig.set_size_inches(25., 25., forward=True)
+                        if format == 'stack':
+                            fig.set_size_inches(8., 8., forward=True)
+                        else:
+                            fig.set_size_inches(25., 25., forward=True)
                     count_canvases += 1 # increase
                     count_pads = 1 # reset
 
                 count_images += 1 # increase
 
         if do_only_1_plot:
-            return fig, axes, image
+            return axes
