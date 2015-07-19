@@ -9,13 +9,14 @@ from astropy.coordinates import Angle
 from gammapy.background import CubeBackgroundModel
 from gammapy import datasets
 from gammapy_bg_models_utilities import CubeBackgroundModelUtils as CBMutils
+from gammapy.datasets.make import make_test_bg_cube_model
 
 GRAPH_DEBUG = 0
 USE_TEMP_FILES = 0
 CACHE = 1 # set to 0 to ignore downloaded files in the cache
           # (or use rm ~/.astropy/cache)
 
-def plot_example(filename):
+def cube_bg_model_plots(filename):
     """Plot background model and store as cube so that it can viewed with ds9.
     """
     bg_model = CubeBackgroundModel.read(filename, format='table')
@@ -46,11 +47,10 @@ def plot_example(filename):
     #bg_model.plot_spectrum(det=Angle([[0., 0.], [1., 1.]], 'degree'))
 
     outfile = 'cube_background_model.fits'
-    bg_model.write(outfile, format='image',
-                   write_kwargs=dict(clobber=True)) # overwrite
+    bg_model.write(outfile, format='image', clobber=True) # overwrite
 
 
-def gammapy_tests(filename):
+def test_cube_bg_model_class(filename):
     """Testing the tests for gammapy.
     """
     # test shape of bg cube when reading a file
@@ -58,6 +58,16 @@ def gammapy_tests(filename):
     print("bg_cube_model.background.shape", bg_cube_model.background.shape)
     print("len(bg_cube_model.background.shape)", len(bg_cube_model.background.shape))
     assert len(bg_cube_model.background.shape) == 3
+    assert bg_cube_model.background.shape == (len(bg_cube_model.energy_bins) - 1,
+                                              len(bg_cube_model.dety_bins) - 1,
+                                              len(bg_cube_model.detx_bins) - 1)
+
+    # example how to access data in cube
+    # TODO: are axis (X, Y) correct?!!!
+    #       need a test with asymmetric number of bins in X/Y!!!
+    energy_bin = bg_cube_model.find_energy_bin(energy=Quantity(2., 'TeV'))
+    det_bin = bg_cube_model.find_det_bin(det=Angle([0., 0.], 'degree'))
+    bg_cube_model.background[energy_bin, det_bin[0], det_bin[1]]
 
     # test image plot:
     # test bg rate values plotted for image plot of energy bin conaining E = 2 TeV
@@ -78,7 +88,7 @@ def gammapy_tests(filename):
     print("plot extent", plot_extent)
 
     # get data from bg model object to compare
-    energy_bin, energy_bin_edges = bg_cube_model.find_energy_bin(energy)
+    energy_bin = bg_cube_model.find_energy_bin(energy)
     model_data = bg_cube_model.background[energy_bin]
     # TODO: get also det (x,y coord) of the bins!!!
     print("model data")
@@ -101,7 +111,7 @@ def gammapy_tests(filename):
     print(plot_data)
 
     # get data from bg model object to compare
-    det_bin, det_bin_edges = bg_cube_model.find_det_bin(det)
+    det_bin = bg_cube_model.find_det_bin(det)
     model_data = bg_cube_model.background[:, det_bin[0], det_bin[1]]
     # TODO: get also energies (x coord) of the points!!!
     print("model data")
@@ -118,8 +128,7 @@ def gammapy_tests(filename):
     else:
         outfile = NamedTemporaryFile(suffix='.fits').name
     print("Writing file {}".format(outfile))
-    bg_cube_model.write(outfile, format='table',
-                        write_kwargs=dict(clobber=True)) # overwrite
+    bg_cube_model.write(outfile, format='table', clobber=True) # overwrite
     bg_model_2 = CubeBackgroundModel.read(outfile, format='table')
     assert_allclose(bg_model_2.background, bg_model_1.background)
     assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins)
@@ -132,8 +141,7 @@ def gammapy_tests(filename):
     else:
         outfile = NamedTemporaryFile(suffix='.fits').name
     print("Writing file {}".format(outfile))
-    bg_cube_model.write(outfile, format='image',
-                        write_kwargs=dict(clobber=True)) # overwrite
+    bg_cube_model.write(outfile, format='image', clobber=True) # overwrite
     # test: this function should produce:
     #  - a file exactly as the other method
     #  - a cube exactly as the other method (once the file is read with the read function)
@@ -156,6 +164,81 @@ def gammapy_tests(filename):
 
     plt.show() #don't quit at the end
 
+
+def test_make_test_bg_cube_model(debug=False):
+    """
+    Testing make_test_bg_cube_model.
+    """
+    # call the function without arguments
+    bg_cube_model = make_test_bg_cube_model()
+
+    # plots (images and spectra)
+    if debug:
+        #make plots
+        CBMutils.plot_images(bg_cube_model)
+        CBMutils.plot_spectra(bg_cube_model, format='stack') # slow!
+
+    outfile = 'test_bg_cube_model_table.fits'
+    print("Writing file {}".format(outfile))
+    bg_cube_model.write(outfile, format='table', clobber=True) # overwrite
+
+    outfile = 'test_bg_cube_model_image.fits'
+    print("Writing file {}".format(outfile))
+    bg_cube_model.write(outfile, format='image', clobber=True) # overwrite
+
+    # make a cube bg model with non-equal axes
+    ndetx_bins = 1
+    ndety_bins = 2
+    nenergy_bins = 3
+    bg_cube_model = make_test_bg_cube_model(ndetx_bins=ndetx_bins, ndety_bins=ndety_bins, nenergy_bins=nenergy_bins)
+
+    # plots (images and spectra)
+    if debug:
+        #make plots
+        CBMutils.plot_images(bg_cube_model)
+        CBMutils.plot_spectra(bg_cube_model, format='stack') # slow!
+
+    outfile = 'test_bg_cube_model_xydiff_table.fits'
+    print("Writing file {}".format(outfile))
+    bg_cube_model.write(outfile, format='table', clobber=True) # overwrite
+
+    outfile = 'test_bg_cube_model_xydiff_image.fits'
+    print("Writing file {}".format(outfile))
+    bg_cube_model.write(outfile, format='image', clobber=True) # over
+
+    # test shape of cube bg model
+    assert len(bg_cube_model.background.shape) == 3
+    assert bg_cube_model.background.shape == (nenergy_bins, ndety_bins, ndetx_bins)
+
+    # make masked bg model
+    bg_cube_model = make_test_bg_cube_model(apply_mask=True)
+
+    # plots (images and spectra)
+    if debug:
+        #make plots
+        CBMutils.plot_images(bg_cube_model)
+        #CBMutils.plot_spectra(bg_cube_model, format='stack') # slow! #this should fail because of 0 plots in log axis!
+
+    outfile = 'test_bg_cube_model_masked_table.fits'
+    print("Writing file {}".format(outfile))
+    bg_cube_model.write(outfile, format='table', clobber=True) # overwrite
+
+    outfile = 'test_bg_cube_model_masked_image.fits'
+    print("Writing file {}".format(outfile))
+    bg_cube_model.write(outfile, format='image', clobber=True) # overwrite
+
+    # test that values with (x, y) > (0, 0) are zero
+    x_points = Angle(np.arange(5), 'degree') + Angle(0.01, 'degree')
+    y_points = Angle(np.arange(5), 'degree') + Angle(0.01, 'degree')
+    e_points = bg_cube_model.energy_bin_centers
+    x_points, y_points, e_points = np.meshgrid(x_points, y_points, e_points,
+                                               indexing='ij')
+    det_bin_index = bg_cube_model.find_det_bin(Angle([x_points, y_points]))
+    e_bin_index = bg_cube_model.find_energy_bin(e_points)
+    bg = bg_cube_model.background[e_bin_index, det_bin_index[1], det_bin_index[0]]
+
+    #assert that values are 0
+    assert_allclose(bg, 0.)
 
 def test_remote_data():
     """Testing the use of remote data in gammapy.
@@ -197,7 +280,7 @@ if __name__ == '__main__':
     ###DIR = '/Users/deil/work/_Data/hess/HESSFITS/pa/Model_Deconvoluted_Prod26/Mpp_Std/background/'
     DIR = '/home/mapaz/astropy/testing_cube_bg_michael_mayer/background/'
     filename = DIR + 'hist_alt3_az0.fits.gz'
-    #filenames.append(filename)
+    filenames.append(filename)
 
     #DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
     #filename = DIR + 'bg_test.fits'
@@ -213,8 +296,10 @@ if __name__ == '__main__':
         print("filename: {}".format(filename))
 
         # call tests
-        #plot_example(filename) # takes long! (many plots/files created!)
-        gammapy_tests(filename)
+        #cube_bg_model_plots(filename) # takes long! (many plots/files created!)
+        #test_cube_bg_model_class(filename)
 
     # call tests
+    test_make_test_bg_cube_model(False)
+    #test_make_test_bg_cube_model(True)
     #test_remote_data()
