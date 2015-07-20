@@ -63,11 +63,9 @@ def test_cube_bg_model_class(filename):
                                               len(bg_cube_model.detx_bins) - 1)
 
     # example how to access data in cube
-    # TODO: are axis (X, Y) correct?!!!
-    #       need a test with asymmetric number of bins in X/Y!!!
     energy_bin = bg_cube_model.find_energy_bin(energy=Quantity(2., 'TeV'))
     det_bin = bg_cube_model.find_det_bin(det=Angle([0., 0.], 'degree'))
-    bg_cube_model.background[energy_bin, det_bin[0], det_bin[1]]
+    bg_cube_model.background[energy_bin, det_bin[1], det_bin[0]]
 
     # test image plot:
     # test bg rate values plotted for image plot of energy bin conaining E = 2 TeV
@@ -112,7 +110,7 @@ def test_cube_bg_model_class(filename):
 
     # get data from bg model object to compare
     det_bin = bg_cube_model.find_det_bin(det)
-    model_data = bg_cube_model.background[:, det_bin[0], det_bin[1]]
+    model_data = bg_cube_model.background[:, det_bin[1], det_bin[0]]
     # TODO: get also energies (x coord) of the points!!!
     print("model data")
     print(model_data)
