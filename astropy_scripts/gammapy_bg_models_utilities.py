@@ -19,6 +19,13 @@ class CubeBackgroundModelUtils():
         value. If no energy is specified, no figure is returned,
         since it would be very memory consuming.
 
+        TODO: solve the problem of having to choose between: (!!!)
+
+        * Linear color axis: showing horrible non scientific notation
+          ticks (i.e. 0.0001).
+        * Log color axis (LogNorm()): showing all images almost equal
+          to each other.
+
         Parameters
         ----------
         bg_model : `~gammapy.background.CubeBackgroundModel`
