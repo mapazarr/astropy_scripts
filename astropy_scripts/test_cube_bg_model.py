@@ -291,15 +291,19 @@ if __name__ == '__main__':
     #filename = DIR + 'bg_cube_model_test.fits'
     filenames.append(filename)
 
+    DIR = '/home/mapaz/astropy/development_code/astropy_scripts/astropy_scripts/'
+    filename = DIR + 'test_bg_cube_model.fits'
+    #filenames.append(filename)
+
     for filename in filenames:
         print()
         print("filename: {}".format(filename))
 
         # call tests
         #cube_bg_model_plots(filename) # takes long! (many plots/files created!)
-        #test_cube_bg_model_class(filename)
+        test_cube_bg_model_class(filename)
 
     # call tests
-    test_make_test_bg_cube_model(False)
+    #test_make_test_bg_cube_model(False)
     #test_make_test_bg_cube_model(True)
     #test_remote_data()
