@@ -26,6 +26,8 @@ class CubeBackgroundModelUtils():
         * Log color axis (LogNorm()): showing all images almost equal
           to each other.
 
+        ref: http://stackoverflow.com/questions/25983218/scientific-notation-colorbar-in-matplotlib (!!!)
+
         Parameters
         ----------
         bg_model : `~gammapy.background.CubeBackgroundModel`

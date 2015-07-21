@@ -4,8 +4,8 @@ from numpy.testing import assert_allclose
 from astropy import wcs
 from astropy.wcs import WCS
 from astropy.coordinates import Angle
-from gammapy.utils.wcs import (linear_arrays_from_wcs,
-                               linear_wcs_from_arrays)
+from gammapy.utils.wcs import (linear_wcs_to_arrays,
+                               linear_arrays_to_wcs)
 
 # ASTROPY STUFF
 
@@ -50,8 +50,6 @@ w_WCS_header = w_WCS.to_header()
 print("w_WCS_header")
 print(repr(w_WCS_header))
 
-#import IPython; IPython.embed()
-
 # GAMMAPY STUFF
 
 # test WCS object
@@ -60,14 +58,14 @@ print("Testing make WCS")
 bins_x = Angle([1., 2., 3., 4.], 'degree')
 #bins_y = Angle([-1.5, 0., 1.5], 'radian')
 bins_y = Angle([-1.5, 0., 1.5], 'degree')
-wcs = linear_wcs_from_arrays("X", "Y", bins_x, bins_y)
+wcs = linear_arrays_to_wcs("X", "Y", bins_x, bins_y)
 wcs_header = wcs.to_header()
 print(repr(wcs_header))
 print()
 print("Testing recover bins")
 nbins_x = len(bins_x) - 1
 nbins_y = len(bins_y) - 1
-reco_bins_x, reco_bins_y = linear_arrays_from_wcs(wcs, nbins_x, nbins_y)
+reco_bins_x, reco_bins_y = linear_wcs_to_arrays(wcs, nbins_x, nbins_y)
 print(repr(reco_bins_x))
 print(repr(reco_bins_y))
 # to deeply test the translation of the bin reconstruction, use this in the wcs creation function:
