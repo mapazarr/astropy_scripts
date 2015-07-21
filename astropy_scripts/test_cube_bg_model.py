@@ -302,6 +302,6 @@ if __name__ == '__main__':
         test_cube_bg_model_class(filename)
 
     # call tests
-    #test_make_test_bg_cube_model(False)
-    #test_make_test_bg_cube_model(True)
+    test_make_test_bg_cube_model(debug=False)
+    #test_make_test_bg_cube_model(debug=True)
     #test_remote_data()
