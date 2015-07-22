@@ -6,6 +6,7 @@ from numpy.testing import assert_allclose
 import matplotlib.pyplot as plt
 from astropy.units import Quantity
 from astropy.coordinates import Angle
+from astropy.tests.helper import assert_quantity_allclose
 from gammapy.background import CubeBackgroundModel
 from gammapy import datasets
 from gammapy_bg_models_utilities import CubeBackgroundModelUtils as CBMutils
@@ -128,10 +129,10 @@ def test_cube_bg_model_class(filename):
     print("Writing file {}".format(outfile))
     bg_cube_model.write(outfile, format='table', clobber=True) # overwrite
     bg_model_2 = CubeBackgroundModel.read(outfile, format='table')
-    assert_allclose(bg_model_2.background, bg_model_1.background)
-    assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins)
-    assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins)
-    assert_allclose(bg_model_2.energy_bins, bg_model_1.energy_bins)
+    assert_quantity_allclose(bg_model_2.background, bg_model_1.background)
+    assert_quantity_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins)
+    assert_quantity_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins)
+    assert_quantity_allclose(bg_model_2.energy_bins, bg_model_1.energy_bins)
 
     # test read/write image file
     if not USE_TEMP_FILES:
@@ -147,10 +148,10 @@ def test_cube_bg_model_class(filename):
     # test if values are correct in the saved file: compare both files
     bg_model_1 = bg_cube_model
     bg_model_2 = CubeBackgroundModel.read(outfile, format='image')
-    assert_allclose(bg_model_2.background, bg_model_1.background)
-    assert_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins)
-    assert_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins)
-    assert_allclose(bg_model_2.energy_bins, bg_model_1.energy_bins)
+    assert_quantity_allclose(bg_model_2.background, bg_model_1.background)
+    assert_quantity_allclose(bg_model_2.detx_bins, bg_model_1.detx_bins)
+    assert_quantity_allclose(bg_model_2.dety_bins, bg_model_1.dety_bins)
+    assert_quantity_allclose(bg_model_2.energy_bins, bg_model_1.energy_bins)
 
     # TODO: test cubes/plots with asymmetric shape (x_bins != y_bins) !!!
 
@@ -236,7 +237,7 @@ def test_make_test_bg_cube_model(debug=False):
     bg = bg_cube_model.background[e_bin_index, det_bin_index[1], det_bin_index[0]]
 
     #assert that values are 0
-    assert_allclose(bg, 0.)
+    assert_quantity_allclose(bg, Quantity(0., bg.unit))
 
 def test_remote_data():
     """Testing the use of remote data in gammapy.
