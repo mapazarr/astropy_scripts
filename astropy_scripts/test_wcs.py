@@ -1,9 +1,9 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals) # python 2 as python 3
-from numpy.testing import assert_allclose
 from astropy import wcs
 from astropy.wcs import WCS
 from astropy.coordinates import Angle
+from astropy.tests.helper import assert_quantity_allclose
 from gammapy.utils.wcs import (linear_wcs_to_arrays,
                                linear_arrays_to_wcs)
 
@@ -71,5 +71,5 @@ print(repr(reco_bins_y))
 # to deeply test the translation of the bin reconstruction, use this in the wcs creation function:
 #w.wcs.crpix = [10, 15] # smthg different from origin (0.5, 0.5) !!!
 # test: reconstructed bins should match original bins
-assert_allclose(reco_bins_x, bins_x)
-assert_allclose(reco_bins_y, bins_y)
+assert_quantity_allclose(reco_bins_x, bins_x)
+assert_quantity_allclose(reco_bins_y, bins_y)
