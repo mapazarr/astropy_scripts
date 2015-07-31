@@ -9,6 +9,52 @@ from gammapy.datasets.make import make_test_observation_table
 from gammapy.time import absolute_time
 from gammapy.catalog import skycoord_from_table
 
+
+def test_sky_box_filter(obs_table, selection):
+    """Common stuff for the test of sky_box filtering of obs tables"""
+    lon_range_eff = (selection['lon'][0] - selection['border'], selection['lon'][1] + selection['border'])
+    lat_range_eff = (selection['lat'][0] - selection['border'], selection['lat'][1] + selection['border'])
+    print("Applied filters {0} {1}".format(lon_range_eff, lat_range_eff))
+    filtered_obs_table = obs_table.filter_observations(selection)
+    print("obs_table")
+    print(obs_table)
+    skycoord = skycoord_from_table(obs_table)
+    skycoord = skycoord.transform_to(selection['frame'])
+    print("Transformed coords: {}".format(skycoord))
+    if any(l < Angle(0., 'degree') for l in lon_range_eff):
+        print("Wrapping lon: {}".format(skycoord.data.lon.wrap_at(Angle(180, 'degree')).to('degree')))
+    print("filtered_obs_table")
+    print(filtered_obs_table)
+    skycoord = skycoord_from_table(filtered_obs_table)
+    skycoord = skycoord.transform_to(selection['frame'])
+    print("Transformed filtered coords: {}".format(skycoord))
+    if any(l < Angle(0., 'degree') for l in lon_range_eff):
+        print("Wrapping lon: {}".format(skycoord.data.lon.wrap_at(Angle(180, 'degree')).to('degree')))
+    lon = skycoord.data.lon
+    lat = skycoord.data.lat
+    if any(l < Angle(0., 'degree') for l in lon_range_eff):
+        lon = lon.wrap_at(Angle(180, 'degree'))
+    assert ((lon_range_eff[0] < lon) & (lon < lon_range_eff[1]) &
+            (lat_range_eff[0] < lat) & (lat < lat_range_eff[1])).all()
+    # test on the inverted selection
+    selection['inverted'] = True
+    print('selection', selection)
+    inv_filtered_obs_table = obs_table.filter_observations(selection)
+    print("inv_filtered_obs_table")
+    print(inv_filtered_obs_table)
+    skycoord = skycoord_from_table(inv_filtered_obs_table)
+    skycoord = skycoord.transform_to(selection['frame'])
+    lon = skycoord.data.lon
+    lat = skycoord.data.lat
+    if any(l < Angle(0., 'degree') for l in lon_range_eff):
+        lon = lon.wrap_at(Angle(180, 'degree'))
+    assert ((lon_range_eff[0] >= lon) | (lon >= lon_range_eff[1]) |
+            (lat_range_eff[0] >= lat) | (lat >= lat_range_eff[1])).all()
+    # the sum of number of entries in both selections should be the total number of entries
+    print("sum = {}; original = {}".format(len(filtered_obs_table) + len(inv_filtered_obs_table), len(obs_table)))
+    assert len(filtered_obs_table) + len(inv_filtered_obs_table) == len(obs_table)
+
+
 def test_filter_observations():
     # create random observation table
     observatory_name='HESS'
@@ -76,23 +122,6 @@ def test_filter_observations():
     assert ((value_min >= filtered_obs_table[variable]) |
             (filtered_obs_table[variable] >= value_max)).all()
 
-##    # test circle selection in obs_id
-##    print()
-##    print("Test circle selection in OBS_ID")
-##    variable = 'OBS_ID'
-##    center = 4
-##    radius = 2
-##    selection = dict(shape='circle', variable=variable,
-##                     center=center, radius=radius)
-##    filtered_obs_table = obs_table.filter_observations(selection)
-##    print("obs_table")
-##    print(obs_table)
-##    print("filtered_obs_table")
-##    print(filtered_obs_table)
-##    assert len(filtered_obs_table) == 3
-##    assert (center - radius < filtered_obs_table[variable]).all()
-##    assert (filtered_obs_table[variable] < center + radius).all()
-
     # test box selection in alt
     print()
     print("Test box selection in ALT")
@@ -115,53 +144,17 @@ def test_filter_observations():
     assert (value_min < Angle(filtered_obs_table[variable])).all()
     assert (Angle(filtered_obs_table[variable]) < value_max).all()
 
-##    # test box selection in zenith angle
-##    print()
-##    print("Test box selection in zenith")
-##    variable = 'zenith'
-##    value_min = Angle(20., 'degree')
-##    value_max = Angle(30., 'degree')
-##    selection = dict(shape='box', variable=variable,
-##                     value_min=value_min, value_max=value_max)
-##    filtered_obs_table = obs_table.filter_observations(selection)
-##    print("obs_table")
-##    print(obs_table)
-##    print("filtered_obs_table")
-##    print(filtered_obs_table)
-##    zenith = Angle(90., 'degree') - filtered_obs_table['ALT']
-##    print("zenit = {}".format(zenith))
-##    assert (value_min < zenith).all()
-##    assert (zenith < value_max).all()
-
-##    # test box selection in time_start
-##    print()
-##    print("Test box selection in TIME_START")
-##    variable = 'TIME_START'
-##    value_min = Time('2012-01-01 00:00:00', format='iso', scale='utc')
-##    value_max = Time('2014-01-01 00:00:00', format='iso', scale='utc')
-##    selection = dict(shape='box', variable=variable,
-##                     value_min=value_min, value_max=value_max)
-##    filtered_obs_table = obs_table.filter_observations(selection)
-##    print("obs_table")
-##    print(obs_table)
-##    print("filtered_obs_table")
-##    print(filtered_obs_table)
-##    time_start = absolute_time(filtered_obs_table['TIME_START'], filtered_obs_table.meta)
-##    print("time_start = {}".format(repr(time_start)))
-##    assert (value_min < time_start).all()
-##    assert (time_start < value_max).all()
-
     # test box selection in time: (time_start, time_stop) within (value_min, value_max)
     print()
     print("Test box selection in time")
     # new obs table with very close (in time) observations (and times in absolute times)
-    datestart = Time('2012-01-01 00:03:00', format='iso', scale='utc')
-    dateend = Time('2012-01-01 02:03:00', format='iso', scale='utc')
+    datestart = Time('2012-01-01T00:03:00', format='isot', scale='utc')
+    dateend = Time('2012-01-01T02:03:00', format='isot', scale='utc')
     obs_table_time = make_test_observation_table(observatory_name, n_obs,
                                                  datestart, dateend, True)
     variable = 'time'
-    value_min = Time('2012-01-01 01:00:00', format='iso', scale='utc')
-    value_max = Time('2012-01-01 02:00:00', format='iso', scale='utc')
+    value_min = Time('2012-01-01T01:00:00', format='isot', scale='utc')
+    value_max = Time('2012-01-01T02:00:00', format='isot', scale='utc')
     selection = dict(type='time_box', variable=variable,
                      time_min=value_min, time_max=value_max)
     filtered_obs_table = obs_table_time.filter_observations(selection)
@@ -193,52 +186,7 @@ def test_filter_observations():
                      lon=(lon_range[0], lon_range[1]),
                      lat=(lat_range[0], lat_range[1]),
                      border=border)
-    lon_range_eff = (lon_range[0] - border, lon_range[1] + border)
-    lat_range_eff = (lat_range[0] - border, lat_range[1] + border)
-    print("Applied filters {0} {1}".format(lon_range_eff, lat_range_eff))
-    filtered_obs_table = obs_table.filter_observations(selection)
-    print("obs_table")
-    print(obs_table)
-    skycoord = skycoord_from_table(obs_table)
-    skycoord = skycoord.transform_to(frame)
-    print("Transformed coords: {}".format(skycoord))
-    if any(l < 0 for l in lon_range_eff):
-        print("Wrapping lon: {}".format(skycoord.data.lon.wrap_at(Angle(180, 'degree')).to('degree')))
-    print("filtered_obs_table")
-    print(filtered_obs_table)
-    skycoord = skycoord_from_table(filtered_obs_table)
-    skycoord = skycoord.transform_to(frame)
-    print("Transformed filtered coords: {}".format(skycoord))
-    if any(l < 0 for l in lon_range_eff):
-        print("Wrapping lon: {}".format(skycoord.data.lon.wrap_at(Angle(180, 'degree')).to('degree')))
-    lon = skycoord.data.lon
-    lat = skycoord.data.lat
-    if any(l < 0 for l in lon_range_eff):
-        lon = lon.wrap_at(Angle(180, 'degree'))
-    assert ((lon_range_eff[0] < lon) & (lon < lon_range_eff[1]) &
-            (lat_range_eff[0] < lat) & (lat < lat_range_eff[1])).all()
-    # test on the inverted selection
-    selection['inverted'] = True
-    print('selection', selection)
-    inv_filtered_obs_table = obs_table.filter_observations(selection)
-    print("inv_filtered_obs_table")
-    print(inv_filtered_obs_table)
-    skycoord = skycoord_from_table(inv_filtered_obs_table)
-    skycoord = skycoord.transform_to(frame)
-    lon = skycoord.data.lon
-    lat = skycoord.data.lat
-    if any(l < 0 for l in lon_range_eff):
-        lon = lon.wrap_at(Angle(180, 'degree'))
-    assert ((lon_range_eff[0] >= lon) | (lon >= lon_range_eff[1]) |
-            (lat_range_eff[0] >= lat) | (lat >= lat_range_eff[1])).all()
-    # the sum of number of entries in both selections should be the total number of entries
-    print("sum = {}; original = {}".format(len(filtered_obs_table) + len(inv_filtered_obs_table), len(obs_table)))
-    assert len(filtered_obs_table) + len(inv_filtered_obs_table) == len(obs_table)
-
-    return
-
-
-
+    test_sky_box_filter(obs_table, selection)
 
     # test sky box selection in radec coordinates
     print()
@@ -251,24 +199,27 @@ def test_filter_observations():
                      lon=(lon_range[0], lon_range[1]),
                      lat=(lat_range[0], lat_range[1]),
                      border=border)
-    lon_range_eff = (lon_range[0] - border, lon_range[1] + border)
-    lat_range_eff = (lat_range[0] - border, lat_range[1] + border)
-    print("Applied filters {0} {1}".format(lon_range_eff, lat_range_eff))
+    test_sky_box_filter(obs_table, selection)
+
+    # test sky circle selection in gal coordinates
+    print()
+    print("Test sky circle selection in gal coordinates:")
+    lon_cen = Angle(0., 'degree')
+    lat_cen = Angle(0., 'degree')
+    radius = Angle(25., 'degree')
+    frame = 'galactic'
+    border = Angle(2., 'degree')
+    selection = dict(type='sky_circle', frame=frame,
+                     lon=lon_cen, lat=lat_cen,
+                     radius=radius, border=border)
     filtered_obs_table = obs_table.filter_observations(selection)
-    print("obs_table")
-    print(obs_table)
-    skycoord = skycoord_from_table(obs_table)
-    skycoord = skycoord.transform_to(frame)
-    print("Transformed coords: {}".format(skycoord))
-    print("filtered_obs_table")
-    print(filtered_obs_table)
-    skycoord = skycoord_from_table(filtered_obs_table)
-    skycoord = skycoord.transform_to(frame)
-    print("Transformed filtered coords: {}".format(skycoord))
-    lon = skycoord.data.lon
-    lat = skycoord.data.lat
-    assert ((lon_range_eff[0] < lon) & (lon < lon_range_eff[1])).all()
-    assert ((lat_range_eff[0] < lat) & (lat < lat_range_eff[1])).all()
+
+
+
+
+
+    return
+
 
     #####import IPython; IPython.embed()
 
@@ -297,8 +248,10 @@ def test_find_observations():
     gammapy-find-obs runinfo.fits
     gammapy-find-obs runinfo.fits --x 3
     gammapy-find-obs runinfo.fits --x 3 --r 2
-    gammapy-find-obs runinfo.fits --x 3 --y 4 --r 2 --system 'radec'
-    gammapy-find-obs runinfo.fits --x 3 --y 4 --dx 5 --dy 6 --system 'radec'
+    gammapy-find-obs runinfo.fits --x 3 --y 4 --r 2 --system 'icrs'
+    gammapy-find-obs runinfo.fits --x 3 --y 4 --dx 5 --dy 6 --system 'icrs'
+    gammapy-find-obs runinfo.fits --x 225 --y -25 --dx 75 --dy 25 --system 'icrs'
+    gammapy-find-obs runinfo.fits --x -25 --y 0 --dx 75 --dy 25 --system 'galactic'
     gammapy-find-obs runinfo.fits --t_start 2 --t_stop 3
     gammapy-find-obs runinfo.fits --t_start '2012-01-01 00:00:00' --t_stop '2014-01-01 00:00:00'
     gammapy-find-obs runinfo.fits --t_start '2012-01-01 01:00:00' --t_stop '2012-01-01 02:00:00' # needs "special" test obs table
