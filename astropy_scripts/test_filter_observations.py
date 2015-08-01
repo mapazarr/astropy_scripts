@@ -339,6 +339,9 @@ def test_filter_sky_regions():
 #   table and put it in gammapy-extra. Once this is done, this should
 #   be adapted consequently.
 
+# For PR #295: https://github.com/gammapy/gammapy/pull/295
+# - revise the old inline comments from Christoph, and implement them
+# !!!!!!!!!!!!!!!!!!!!!!!
 
 
 def test_find_observations():
