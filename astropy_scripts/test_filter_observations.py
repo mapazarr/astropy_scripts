@@ -10,22 +10,24 @@ from gammapy.time import absolute_time
 from gammapy.catalog import skycoord_from_table
 
 
-def common_sky_region_filter_test_routines(obs_table, selection):
-    """Common routines for the tests of sky_box/sky_circle filtering of obs tables"""
+def common_sky_region_select_test_routines(obs_table, selection):
+    """Common routines for the tests of sky_box/sky_circle selection of obs tables."""
     type = selection['type']
     if type not in ['sky_box', 'sky_circle']:
         raise ValueError("Type {} not supported.".format(type))
 
     if type == 'sky_box':
-        lon_range_eff = (selection['lon'][0] - selection['border'], selection['lon'][1] + selection['border'])
-        lat_range_eff = (selection['lat'][0] - selection['border'], selection['lat'][1] + selection['border'])
-        print("Applied filters {0} {1}".format(lon_range_eff, lat_range_eff))
+        lon_range_eff = (selection['lon'][0] - selection['border'],
+                         selection['lon'][1] + selection['border'])
+        lat_range_eff = (selection['lat'][0] - selection['border'],
+                         selection['lat'][1] + selection['border'])
+        print("Applied selections {0} {1}".format(lon_range_eff, lat_range_eff))
     elif type == 'sky_circle':
         lon_cen = selection['lon']
         lat_cen = selection['lat']
         center = SkyCoord(lon_cen, lat_cen, frame=selection['frame'])
         radius_eff = selection['radius'] + selection['border']
-        print("Applied filters {0} around {1})".format(radius_eff, center))
+        print("Applied selections {0} around {1})".format(radius_eff, center))
 
     do_wrapping = False
     # not needed in the case of sky_circle
@@ -50,14 +52,14 @@ def common_sky_region_filter_test_routines(obs_table, selection):
 
     # test on the selection
     print()
-    print("filtered_obs_table")
+    print("selected_obs_table")
     print('selection:', selection)
-    filtered_obs_table = obs_table.filter_observations(selection)
-    print(filtered_obs_table)
-    skycoord = skycoord_from_table(filtered_obs_table)
+    selected_obs_table = obs_table.select_observations(selection)
+    print(selected_obs_table)
+    skycoord = skycoord_from_table(selected_obs_table)
     if type == 'sky_box':
         skycoord = skycoord.transform_to(selection['frame'])
-        print("Transformed filtered coords: {}".format(skycoord))
+        print("Transformed selected coords: {}".format(skycoord))
         if do_wrapping:
             print("Wrapping lon: {}".format(skycoord.data.lon.wrap_at(Angle(180, 'degree')).to('degree')))
         lon = skycoord.data.lon
@@ -68,20 +70,20 @@ def common_sky_region_filter_test_routines(obs_table, selection):
                 (lat_range_eff[0] < lat) & (lat < lat_range_eff[1])).all()
     elif type == 'sky_circle':
         ang_distance = skycoord.separation(center)
-        print("Angular filtered distances: {}".format(ang_distance))
+        print("Angular selected distances: {}".format(ang_distance))
         assert (ang_distance < radius_eff).all()
 
     # test on the inverted selection
     print()
-    print("inv_filtered_obs_table")
+    print("inv_selected_obs_table")
     selection['inverted'] = True
     print('selection:', selection)
-    inv_filtered_obs_table = obs_table.filter_observations(selection)
-    print(inv_filtered_obs_table)
-    skycoord = skycoord_from_table(inv_filtered_obs_table)
+    inv_selected_obs_table = obs_table.select_observations(selection)
+    print(inv_selected_obs_table)
+    skycoord = skycoord_from_table(inv_selected_obs_table)
     if type == 'sky_box':
         skycoord = skycoord.transform_to(selection['frame'])
-        print("Transformed inv filtered coords: {}".format(skycoord))
+        print("Transformed inv selected coords: {}".format(skycoord))
         if do_wrapping:
             print("Wrapping lon: {}".format(skycoord.data.lon.wrap_at(Angle(180, 'degree')).to('degree')))
         lon = skycoord.data.lon
@@ -92,29 +94,27 @@ def common_sky_region_filter_test_routines(obs_table, selection):
                 (lat_range_eff[0] >= lat) | (lat >= lat_range_eff[1])).all()
     elif type == 'sky_circle':
         ang_distance = skycoord.separation(center)
-        print("Angular inv filtered distances: {}".format(ang_distance))
+        print("Angular inv selected distances: {}".format(ang_distance))
         assert (ang_distance >= radius_eff).all()
 
     # the sum of number of entries in both selections should be the total number of entries
     print()
-    print(" original = {}; filterd = {}; inv_filtered = {}; sum = {}"
-          .format(len(obs_table), len(filtered_obs_table), len(inv_filtered_obs_table),
-                  len(filtered_obs_table) + len(inv_filtered_obs_table)))
-    assert len(filtered_obs_table) + len(inv_filtered_obs_table) == len(obs_table)
+    print(" original = {}; selected = {}; inv_selected = {}; sum = {}"
+          .format(len(obs_table), len(selected_obs_table), len(inv_selected_obs_table),
+                  len(selected_obs_table) + len(inv_selected_obs_table)))
+    assert len(selected_obs_table) + len(inv_selected_obs_table) == len(obs_table)
 
 
-def test_filter_observations():
-    test_filter_parameter_box()
-    test_filter_time_box()
-    test_filter_sky_regions()
+def test_select_observations():
+    test_select_parameter_box()
+    test_select_time_box()
+    test_select_sky_regions()
 
-def test_filter_parameter_box():
-    """Test filter parameter box."""
+def test_select_parameter_box():
+    """Test select parameter box."""
 
     # create random observation table
-    observatory_name='HESS'
-    n_obs = 10
-    obs_table = make_test_observation_table(observatory_name, n_obs)
+    obs_table = make_test_observation_table(n_obs=10)
     print("obs_table")
     print(obs_table)
 
@@ -125,23 +125,23 @@ def test_filter_parameter_box():
     zenith_max = Angle(30., 'degree')
     zenith = Angle(90., 'degree') - obs_table['ALT']
     zenith_mask = (zenith_min <= zenith) & (zenith < zenith_max)
-    filtered_obs_table = obs_table[zenith_mask]
+    selected_obs_table = obs_table[zenith_mask]
     print("obs_table")
     print(obs_table)
-    print("filtered_obs_table")
-    print(filtered_obs_table)
+    print("selected_obs_table")
+    print(selected_obs_table)
 
     # test no selection: input and output tables should be the same
     print()
     print("Test no selection:")
-    filtered_obs_table = obs_table.filter_observations()
+    selected_obs_table = obs_table.select_observations()
     print("obs_table")
     print(obs_table)
-    print("filtered_obs_table")
-    print(filtered_obs_table)
-    assert len(filtered_obs_table) == len(obs_table)
+    print("selected_obs_table")
+    print(selected_obs_table)
+    assert len(selected_obs_table) == len(obs_table)
 
-    # filter some pars and check the correspoding values in the columns
+    # select some pars and check the correspoding values in the columns
 
     # test box selection in obs_id
     print()
@@ -151,14 +151,14 @@ def test_filter_parameter_box():
     value_max = 5
     selection = dict(type='par_box', variable=variable,
                      value_min=value_min, value_max=value_max)
-    filtered_obs_table = obs_table.filter_observations(selection)
+    selected_obs_table = obs_table.select_observations(selection)
     print("obs_table")
     print(obs_table)
-    print("filtered_obs_table")
-    print(filtered_obs_table)
-    assert len(filtered_obs_table) == 2
-    assert (value_min < filtered_obs_table[variable]).all()
-    assert (filtered_obs_table[variable] < value_max).all()
+    print("selected_obs_table")
+    print(selected_obs_table)
+    assert len(selected_obs_table) == 3
+    assert (value_min <= selected_obs_table[variable]).all()
+    assert (selected_obs_table[variable] < value_max).all()
 
     # test box selection in obs_id inverted
     print()
@@ -168,14 +168,14 @@ def test_filter_parameter_box():
     #value_max = 5
     selection = dict(type='par_box', variable=variable,
                      value_min=value_min, value_max=value_max, inverted=True)
-    filtered_obs_table = obs_table.filter_observations(selection)
+    selected_obs_table = obs_table.select_observations(selection)
     print("obs_table")
     print(obs_table)
-    print("filtered_obs_table")
-    print(filtered_obs_table)
-    assert len(filtered_obs_table) == 8
-    assert ((value_min >= filtered_obs_table[variable]) |
-            (filtered_obs_table[variable] >= value_max)).all()
+    print("selected_obs_table")
+    print(selected_obs_table)
+    assert len(selected_obs_table) == 7
+    assert ((value_min > selected_obs_table[variable]) |
+            (selected_obs_table[variable] >= value_max)).all()
 
     # test box selection in alt
     print()
@@ -189,28 +189,28 @@ def test_filter_parameter_box():
     #value_max = Angle(70., 'degree').to('radian')
     selection = dict(type='par_box', variable=variable,
                      value_min=value_min, value_max=value_max)
-    filtered_obs_table = obs_table.filter_observations(selection)
+    selected_obs_table = obs_table.select_observations(selection)
     print("obs_table")
     print(obs_table)
-    print("filtered_obs_table")
-    print(filtered_obs_table)
-    #assert (value_min < Quantity(filtered_obs_table[variable])).all()
-    #assert (Quantity(filtered_obs_table[variable]) < value_max).all()
-    assert (value_min < Angle(filtered_obs_table[variable])).all()
-    assert (Angle(filtered_obs_table[variable]) < value_max).all()
+    print("selected_obs_table")
+    print(selected_obs_table)
+    #assert (value_min < Quantity(selected_obs_table[variable])).all()
+    #assert (Quantity(selected_obs_table[variable]) < value_max).all()
+    assert (value_min < Angle(selected_obs_table[variable])).all()
+    assert (Angle(selected_obs_table[variable]) < value_max).all()
 
 
-def test_filter_time_box():
-    """Test filter time box."""
+def test_select_time_box():
+    """Test select time box."""
 
     # create random observation table with very close (in time)
     # observations (and times in absolute times)
-    observatory_name='HESS'
-    n_obs = 10
     datestart = Time('2012-01-01T00:30:00', format='isot', scale='utc')
     dateend = Time('2012-01-01T02:30:00', format='isot', scale='utc')
-    obs_table_time = make_test_observation_table(observatory_name, n_obs,
-                                                 datestart, dateend, True)
+    obs_table_time = make_test_observation_table(n_obs=10,
+                                                 datestart=datestart,
+                                                 dateend=dateend,
+                                                 debug=True)
 
     # test box selection in time: (time_start, time_stop) within (value_min, value_max)
     print()
@@ -219,17 +219,17 @@ def test_filter_time_box():
     value_max = Time('2012-01-01T02:00:00', format='isot', scale='utc')
     selection = dict(type='time_box',
                      time_min=value_min, time_max=value_max)
-    filtered_obs_table = obs_table_time.filter_observations(selection)
+    selected_obs_table = obs_table_time.select_observations(selection)
     print("obs_table_time")
     print(obs_table_time)
-    print("filtered_obs_table")
-    print(filtered_obs_table)
-    if filtered_obs_table.meta['TIME_FORMAT'] == 'absolute': # this is true, since I asked for it when creating the obs table
-        time_start = filtered_obs_table['TIME_START']
-        time_stop = filtered_obs_table['TIME_STOP']
+    print("selected_obs_table")
+    print(selected_obs_table)
+    if selected_obs_table.meta['TIME_FORMAT'] == 'absolute': # this is true, since I asked for it when creating the obs table
+        time_start = selected_obs_table['TIME_START']
+        time_stop = selected_obs_table['TIME_STOP']
     else:
-        time_start = absolute_time(filtered_obs_table['TIME_START'], filtered_obs_table.meta)
-        time_stop = absolute_time(filtered_obs_table['TIME_STOP'], filtered_obs_table.meta)
+        time_start = absolute_time(selected_obs_table['TIME_START'], selected_obs_table.meta)
+        time_stop = absolute_time(selected_obs_table['TIME_STOP'], selected_obs_table.meta)
     print("time_start = {}".format(repr(time_start)))
     print("time_stop = {}".format(repr(time_stop)))
     assert (value_min < time_start).all()
@@ -238,13 +238,11 @@ def test_filter_time_box():
     assert (time_stop < value_max).all()
 
 
-def test_filter_sky_regions():
-    """Test filter sky regions (box and circle)."""
+def test_select_sky_regions():
+    """Test select sky regions (box and circle)."""
 
     # create random observation table with many entries
-    observatory_name='HESS'
-    n_obs = 100
-    obs_table = make_test_observation_table(observatory_name, n_obs)
+    obs_table = make_test_observation_table(n_obs=100)
     print("obs_table")
     print(obs_table)
 
@@ -259,7 +257,7 @@ def test_filter_sky_regions():
                      lon=lon_range,
                      lat=lat_range,
                      border=border)
-    common_sky_region_filter_test_routines(obs_table, selection)
+    common_sky_region_select_test_routines(obs_table, selection)
 
     # test sky box selection in radec coordinates
     print()
@@ -272,7 +270,7 @@ def test_filter_sky_regions():
                      lon=lon_range,
                      lat=lat_range,
                      border=border)
-    common_sky_region_filter_test_routines(obs_table, selection)
+    common_sky_region_select_test_routines(obs_table, selection)
 
     # test sky circle selection in gal coordinates
     print()
@@ -285,7 +283,7 @@ def test_filter_sky_regions():
     selection = dict(type='sky_circle', frame=frame,
                      lon=lon_cen, lat=lat_cen,
                      radius=radius, border=border)
-    common_sky_region_filter_test_routines(obs_table, selection)
+    common_sky_region_select_test_routines(obs_table, selection)
 
     # test sky circle selection in radec coordinates
     print()
@@ -298,7 +296,7 @@ def test_filter_sky_regions():
     selection = dict(type='sky_circle', frame=frame,
                      lon=lon_cen, lat=lat_cen,
                      radius=radius, border=border)
-    common_sky_region_filter_test_routines(obs_table, selection)
+    common_sky_region_select_test_routines(obs_table, selection)
 
     #####import IPython; IPython.embed()
 
@@ -322,7 +320,7 @@ def test_filter_sky_regions():
 #    - high-level docs of find_observations (more?)
 #TODO: send a "preliminary" version to Deil (push)
 #TODO: I need to read runinfo.fits!!! (need to convert format)!!!
-#TODO: change "=" in inequalities: the direct selection should keep the value (i.e. check filter in OBS_ID) + update docs in file:///home/mapaz/astropy/development_code/gammapy/docs/_build/html/obs/find_observations.html (the case of OBS_ID filter)!!!!
+#TODO: change "=" in inequalities: the direct selection should keep the value (i.e. check select in OBS_ID) + update docs in file:///home/mapaz/astropy/development_code/gammapy/docs/_build/html/obs/find_observations.html (the case of OBS_ID select)!!!! -> done
 
 # in observation.py
 #TODO:  check that I don't break anything because of missing tests in existing code!!! (i.e. in https://github.com/mapazarr/hess-host-analyses/blob/master/hgps_survey_map/hgps_survey_map.py#L62)
@@ -335,13 +333,16 @@ def test_filter_sky_regions():
 #
 #   TODO: as for now, it doesn't really use the dummy.fits file;
 #   the routine creates a random observation table with 100 entries
-#   and filters on this. I need to produce a dummy.fits observation
+#   and selects on this. I need to produce a dummy.fits observation
 #   table and put it in gammapy-extra. Once this is done, this should
 #   be adapted consequently.
+
+# If I put a test obs list on gammapy-extra -> edit the obs format docs to point to it as example obs table!!!!
 
 # For PR #295: https://github.com/gammapy/gammapy/pull/295
 # - revise the old inline comments from Christoph, and implement them
 # !!!!!!!!!!!!!!!!!!!!!!!
+# - the new ones too!!!!!
 
 
 def test_find_observations():
@@ -365,7 +366,7 @@ def test_find_observations():
     gammapy-find-obs runinfo.fits --par_name 'ALT' --par_min 60 --par_max 70
     """
 
-    # TODO: test the time selection using an obs table in 2 different formats (absolute and MET)!!!!! -> actually not necessary, it's tested in test_filter_observations
+    # TODO: test the time selection using an obs table in 2 different formats (absolute and MET)!!!!! -> actually not necessary, it's tested in test_select_observations
     # TODO: a really long selection, with many criteria
 
 
@@ -446,6 +447,6 @@ def test_skycoord_angle_wrapping():
 
 
 if __name__ == '__main__':
-    test_filter_observations()
+    test_select_observations()
     test_find_observations()
     test_skycoord_angle_wrapping()

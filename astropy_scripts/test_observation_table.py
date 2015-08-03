@@ -63,7 +63,7 @@ data_store = DataStore(dir=HESSFITS_MPP)
 obs_table1 = data_store.make_observation_table()
 #observatory_name='HESS'
 #n_obs = 100
-#observation_table = make_test_observation_table(observatory_name, n_obs)
+#observation_table = make_test_observation_table(observatory_name=observatory_name, n_obs=n_obs)
 zenith_min = Angle(20., 'degree')
 zenith_max = Angle(40., 'degree')
 zenith = Angle(90., 'degree') - obs_table1['ALT_PNT']
@@ -78,7 +78,7 @@ print()
 print("case 2")
 observatory_name='HESS'
 n_obs = 10
-obs_table2 = make_test_observation_table(observatory_name, n_obs)
+obs_table2 = make_test_observation_table(observatory_name=observatory_name, n_obs=n_obs)
 zenith_min = Angle(20., 'degree')
 zenith_max = Angle(40., 'degree')
 zenith = Angle(90., 'degree') - obs_table2['ALT']
