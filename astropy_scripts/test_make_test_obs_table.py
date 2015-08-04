@@ -47,7 +47,7 @@ astro_array_sel = np.vstack([astro_table['OBS_ID'], astro_table['TIME_OBSERVATIO
 #####################################################################
 
 # playing with observation table generator
-obs_table = make_test_observation_table(observatory_name, n_obs, debug=debug)
+obs_table = make_test_observation_table(observatory_name=observatory_name, n_obs=n_obs, use_abs_time=debug)
 
 print("obs_table.summary")
 print(obs_table.summary())
