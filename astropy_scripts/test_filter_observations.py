@@ -14,7 +14,7 @@ def common_sky_region_select_test_routines(obs_table, selection):
     """Common routines for the tests of sky_box/sky_circle selection of obs tables."""
     type = selection['type']
     if type not in ['sky_box', 'sky_circle']:
-        raise ValueError("Type {} not supported.".format(type))
+        raise ValueError("Invalid type: {}".format(type))
 
     if type == 'sky_box':
         lon_range_eff = (selection['lon'][0] - selection['border'],
@@ -147,18 +147,16 @@ def test_select_parameter_box():
     print()
     print("Test box selection in OBS_ID")
     variable = 'OBS_ID'
-    value_min = 2
-    value_max = 5
-    selection = dict(type='par_box', variable=variable,
-                     value_min=value_min, value_max=value_max)
+    value_range = [2, 5]
+    selection = dict(type='par_box', variable=variable, value_range=value_range)
     selected_obs_table = obs_table.select_observations(selection)
     print("obs_table")
     print(obs_table)
     print("selected_obs_table")
     print(selected_obs_table)
     assert len(selected_obs_table) == 3
-    assert (value_min <= selected_obs_table[variable]).all()
-    assert (selected_obs_table[variable] < value_max).all()
+    assert (value_range[0] <= selected_obs_table[variable]).all()
+    assert (selected_obs_table[variable] < value_range[1]).all()
 
     # test box selection in obs_id inverted
     print()
@@ -167,37 +165,33 @@ def test_select_parameter_box():
     #value_min = 2
     #value_max = 5
     selection = dict(type='par_box', variable=variable,
-                     value_min=value_min, value_max=value_max, inverted=True)
+                     value_range=value_range, inverted=True)
     selected_obs_table = obs_table.select_observations(selection)
     print("obs_table")
     print(obs_table)
     print("selected_obs_table")
     print(selected_obs_table)
     assert len(selected_obs_table) == 7
-    assert ((value_min > selected_obs_table[variable]) |
-            (selected_obs_table[variable] >= value_max)).all()
+    assert ((value_range[0] > selected_obs_table[variable]) |
+            (selected_obs_table[variable] >= value_range[1])).all()
 
     # test box selection in alt
     print()
     print("Test box selection in ALT")
     variable = 'ALT'
-    #value_min = 60.
-    #value_max = 70.
-    value_min = Angle(60., 'degree')
-    value_max = Angle(70., 'degree')
-    #value_min = Angle(60., 'degree').to('radian')
-    #value_max = Angle(70., 'degree').to('radian')
-    selection = dict(type='par_box', variable=variable,
-                     value_min=value_min, value_max=value_max)
+    #value_range = [60., 70.]
+    value_range = Angle([60., 70.], 'degree')
+    #value_range = Angle([60., 70.], 'degree').to('radian')
+    selection = dict(type='par_box', variable=variable, value_range=value_range)
     selected_obs_table = obs_table.select_observations(selection)
     print("obs_table")
     print(obs_table)
     print("selected_obs_table")
     print(selected_obs_table)
-    #assert (value_min < Quantity(selected_obs_table[variable])).all()
-    #assert (Quantity(selected_obs_table[variable]) < value_max).all()
-    assert (value_min < Angle(selected_obs_table[variable])).all()
-    assert (Angle(selected_obs_table[variable]) < value_max).all()
+    #assert (value_range[0] < Quantity(selected_obs_table[variable])).all()
+    #assert (Quantity(selected_obs_table[variable]) < value_range[1]).all()
+    assert (value_range[0] < Angle(selected_obs_table[variable])).all()
+    assert (Angle(selected_obs_table[variable]) < value_range[1]).all()
 
 
 def test_select_time_box():
@@ -210,15 +204,14 @@ def test_select_time_box():
     obs_table_time = make_test_observation_table(n_obs=10,
                                                  datestart=datestart,
                                                  dateend=dateend,
-                                                 debug=True)
+                                                 use_abs_time=True)
 
-    # test box selection in time: (time_start, time_stop) within (value_min, value_max)
+    # test box selection in time: (time_start, time_stop) within value_range
     print()
     print("Test box selection in time")
-    value_min = Time('2012-01-01T01:00:00', format='isot', scale='utc')
-    value_max = Time('2012-01-01T02:00:00', format='isot', scale='utc')
-    selection = dict(type='time_box',
-                     time_min=value_min, time_max=value_max)
+    value_range = Time(['2012-01-01T01:00:00', '2012-01-01T02:00:00'],
+                       format='isot', scale='utc')
+    selection = dict(type='time_box', time_range=value_range)
     selected_obs_table = obs_table_time.select_observations(selection)
     print("obs_table_time")
     print(obs_table_time)
@@ -232,10 +225,10 @@ def test_select_time_box():
         time_stop = absolute_time(selected_obs_table['TIME_STOP'], selected_obs_table.meta)
     print("time_start = {}".format(repr(time_start)))
     print("time_stop = {}".format(repr(time_stop)))
-    assert (value_min < time_start).all()
-    assert (time_start < value_max).all()
-    assert (value_min < time_stop).all()
-    assert (time_stop < value_max).all()
+    assert (value_range[0] < time_start).all()
+    assert (time_start < value_range[1]).all()
+    assert (value_range[0] < time_stop).all()
+    assert (time_stop < value_range[1]).all()
 
 
 def test_select_sky_regions():
@@ -306,6 +299,7 @@ def test_select_sky_regions():
     # what is border for???!!!
 
     # TODO: seed all tests with random obs tables (or random bg cubes?) otherwise I get strange failures from time to time!!!!!!
+    #       or use test file in gammapy-extra
 
     # TODO: I'm testing on the elements that survive the selection, but not on the ones that fail!!!!
     #       if for instance all elements are skipped because of a problem in the selection, then the test passes as good!!!
@@ -313,14 +307,7 @@ def test_select_sky_regions():
     #       not completely: I can have the same problem!!!
     #       test that the sum of entries in both tables should be the total number of entries in the original table
 
-#TODO: clean code from TODO's !!!
-#TODO: correct docs
-#    - docstrings of observation functions -> done
-#    - docstrings of find_obs
-#    - high-level docs of find_observations (more?)
-#TODO: send a "preliminary" version to Deil (push)
-#TODO: I need to read runinfo.fits!!! (need to convert format)!!!
-#TODO: change "=" in inequalities: the direct selection should keep the value (i.e. check select in OBS_ID) + update docs in file:///home/mapaz/astropy/development_code/gammapy/docs/_build/html/obs/find_observations.html (the case of OBS_ID select)!!!! -> done
+#TODO: I need to read runinfo.fits!!! (need to convert format)!!! (see below)
 
 # in observation.py
 #TODO:  check that I don't break anything because of missing tests in existing code!!! (i.e. in https://github.com/mapazarr/hess-host-analyses/blob/master/hgps_survey_map/hgps_survey_map.py#L62)
@@ -329,20 +316,11 @@ def test_select_sky_regions():
 # TODO: runinfo.fits col names need to be converted!!!
 # TODO: 1st we need to check if the converter has to be applied at all?
 #       solution: write a converter, but don't apply it. assume the format is the accepted one in gammapy. The user should use the converter to write a new file
-# for now: using a test file REMOVE THIS!!!!
-#
-#   TODO: as for now, it doesn't really use the dummy.fits file;
-#   the routine creates a random observation table with 100 entries
-#   and selects on this. I need to produce a dummy.fits observation
-#   table and put it in gammapy-extra. Once this is done, this should
-#   be adapted consequently.
 
-# If I put a test obs list on gammapy-extra -> edit the obs format docs to point to it as example obs table!!!!
+# TODO: make fin-obs par_box recursive!!!
+#       allow multiple var selections!!! (read arrays/lists)
 
-# For PR #295: https://github.com/gammapy/gammapy/pull/295
-# - revise the old inline comments from Christoph, and implement them
-# !!!!!!!!!!!!!!!!!!!!!!!
-# - the new ones too!!!!!
+# TODO: make a TODO-list file!!!
 
 
 def test_find_observations():
