@@ -320,6 +320,13 @@ def test_select_sky_regions():
 # TODO: make fin-obs par_box recursive!!!
 #       allow multiple var selections!!! (read arrays/lists)
 
+# TODO: check https://github.com/gammapy/gammapy/issues/315
+
+# TODO: change the way I emphasize text in docstrings/rst. In particular 'type' keyword in gammapy/obs/observation.py in select_observations (the way it is now, it tries to make a link, and does link the type class doc of python)!!!
+# Use these:
+# http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#id65
+# http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#id66
+
 # TODO: make a TODO-list file!!!
 
 
