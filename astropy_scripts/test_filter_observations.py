@@ -291,42 +291,16 @@ def test_select_sky_regions():
                      radius=radius, border=border)
     common_sky_region_select_test_routines(obs_table, selection)
 
-    #####import IPython; IPython.embed()
-
     # TODO: test sky box selection of a box with lon on the range (0, 180) deg, with border 2 !!!!
     # also (0, 10) deg, with border 2 !!!!
     # also (0, 200) deg, with border 2 !!!!
     # what is border for???!!!
 
-    # TODO: seed all tests with random obs tables (or random bg cubes?) otherwise I get strange failures from time to time!!!!!!
-    #       or use test file in gammapy-extra
-
-    # TODO: I'm testing on the elements that survive the selection, but not on the ones that fail!!!!
+    # TODO: I'm testing on the elements that survive the selection, but not on the ones that fail!!!! -> ~done?
     #       if for instance all elements are skipped because of a problem in the selection, then the test passes as good!!!
     #       would testing on the inverted selection help??!!!
     #       not completely: I can have the same problem!!!
-    #       test that the sum of entries in both tables should be the total number of entries in the original table
-
-#TODO: I need to read runinfo.fits!!! (need to convert format)!!! (see below)
-
-# in observation.py
-#TODO:  check that I don't break anything because of missing tests in existing code!!! (i.e. in https://github.com/mapazarr/hess-host-analyses/blob/master/hgps_survey_map/hgps_survey_map.py#L62)
-
-# in find_obs.py
-# TODO: runinfo.fits col names need to be converted!!!
-# TODO: 1st we need to check if the converter has to be applied at all?
-#       solution: write a converter, but don't apply it. assume the format is the accepted one in gammapy. The user should use the converter to write a new file
-
-# TODO: make find-obs par_box recursive!!!
-#       allow multiple var selections!!! (read arrays/lists)
-
-# TODO: check https://github.com/gammapy/gammapy/issues/315
-
-# TODO: in gammapy/examples: plot_background_model.py -> plot_cube_background_model.py
-#       and update names of vairables functions, inside the script
-#      (and in the docs!!!!) ex. .. literalinclude:: ../../examples/plot_background_model.py in docs/background/models.rst
-
-# TODO: make a TODO-list file!!!
+    #       on top of that, test that the sum of entries in both tables should be the total number of entries in the original table -> works, but is it enough?
 
 
 def test_find_observations():
@@ -350,7 +324,6 @@ def test_find_observations():
     gammapy-find-obs runinfo.fits --par_name 'ALT' --par_min 60 --par_max 70
     """
 
-    # TODO: test the time selection using an obs table in 2 different formats (absolute and MET)!!!!! -> actually not necessary, it's tested in test_select_observations
     # TODO: a really long selection, with many criteria
 
 
