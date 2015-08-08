@@ -317,15 +317,14 @@ def test_select_sky_regions():
 # TODO: 1st we need to check if the converter has to be applied at all?
 #       solution: write a converter, but don't apply it. assume the format is the accepted one in gammapy. The user should use the converter to write a new file
 
-# TODO: make fin-obs par_box recursive!!!
+# TODO: make find-obs par_box recursive!!!
 #       allow multiple var selections!!! (read arrays/lists)
 
 # TODO: check https://github.com/gammapy/gammapy/issues/315
 
-# TODO: change the way I emphasize text in docstrings/rst. In particular 'type' keyword in gammapy/obs/observation.py in select_observations (the way it is now, it tries to make a link, and does link the type class doc of python)!!!
-# Use these:
-# http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#id65
-# http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#id66
+# TODO: in gammapy/examples: plot_background_model.py -> plot_cube_background_model.py
+#       and update names of vairables functions, inside the script
+#      (and in the docs!!!!) ex. .. literalinclude:: ../../examples/plot_background_model.py in docs/background/models.rst
 
 # TODO: make a TODO-list file!!!
 
