@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals) # python 2 as python 3
+import os
 import matplotlib.pyplot as plt
 from astropy.units import Quantity
 from astropy.coordinates import Angle
@@ -9,6 +10,7 @@ from gammapy.background import CubeBackgroundModel
 
 DEBUG = 2 # 0: no output, 1: output, 2: run fast, 3: more verbose
 GRAPH_DEBUG = 1 # 0: no plots, 1: make plots, 2: wait between steps (bins), 3: draw 3D scatter plots (not implemented)
+CLEAN_WORKING_DIR = 1 # remove existing observation and bg cube model files
 
 HESSFITS_MPP = '/home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std'
 
@@ -42,8 +44,14 @@ def bg_models_debug_plots():
                 print("bin az", i_az)
 
             # read bg cube model from file
-            filename = 'bg_cube_model_alt{0}_az{1}_table.fits'.format(i_alt, i_az)
-            bg_cube_model = CubeBackgroundModel.read(filename, format='table')
+            indir = os.environ['PWD'] + '/bg_cube_models/'
+            infile = indir +\
+                     'bg_cube_model_alt{0}_az{1}_table.fits.gz'.format(i_alt, i_az)
+            # skip bins with no bg cube model file
+            if not os.path.isfile(infile):
+                print("WARNING, file not found: {}".format(infile))
+                continue # skip the rest
+            bg_cube_model = CubeBackgroundModel.read(infile, format='table')
 
 
             fig, axes = plt.subplots(nrows=1, ncols=3)
@@ -74,19 +82,27 @@ def bg_models_debug_plots():
     if GRAPH_DEBUG:
         plt.show() # don't leave at the end
 
+
 def test_make_bg_cube_models():
     """
     gammapy-background-cube -h
     gammapy-make_bg_cube_models -h
     """
+    # Need to make sure the working dir is clean, otherwise old
+    # files could be mixed up in the new models!
+    if CLEAN_WORKING_DIR:
+        print("Cleaning working dir.")
+        #command = "rm bg_observation_table* bg_cube_model_alt* -fr"
+        command = "rm bg_observation_table.fits.gz splitted_obs_list/ bg_cube_models/ -fr"
+        print(command)
+        os.system(command)
+
     make_bg_cube_models(loglevel='debug',
                         fitspath=HESSFITS_MPP)
 
     if GRAPH_DEBUG:
         # check model: do some plots
         bg_models_debug_plots()
-
-
 
 
 if __name__ == '__main__':
