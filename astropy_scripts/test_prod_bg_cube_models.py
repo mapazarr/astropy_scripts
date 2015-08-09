@@ -29,6 +29,8 @@ if DEBUG > 1:
 
 def bg_models_debug_plots():
 
+    # TODO: call plot_bg_cube_model_comparison !!!
+
     # loop over altitude and azimuth angle bins: remember 1 bin less than bin boundaries
     for i_alt in range(len(altitude_edges) - 1):
         if DEBUG:
