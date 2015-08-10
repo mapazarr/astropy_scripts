@@ -37,3 +37,23 @@ See also TODOs in test_filter_observations.py:
 #       on top of that, test that the sum of entries in both tables should be the total number of entries in the original table -> works, but is it enough?
 
 # TODO: a really long selection (in find-obs), with many criteria
+
+
+FAKE OBS:
+
+- make a dummy obs table
+
+- generate event lists according to the dummy obs table
+
+- fake bg like in dummy bg model
+  - add a dependency with zenith angle (what about azimuth, muon eff, n tels, ...?)
+  - add this dependency/ies also into dummy bg model?
+
+- add gaussian sources according to TeVCAT
+  - take into account the extensions of the sources, and the fluxes, and the PSF
+  - maybe gaussian is not the best model for extended sources: disk/ellipse with radius of the sources + PSF?
+
+- for the bg cube models:
+ - make it work so that no HESS data is necessary
+ - make it work with few data (few alt-az bins?), so that the scripts run fast
+ - if this works, maybe I don't need the DEBUG variable any more, since I won't need DEBUG > 1 !!!! (I can probably also remove the DEBUG > 2 calls, right?)
