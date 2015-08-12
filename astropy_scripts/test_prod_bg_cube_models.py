@@ -8,7 +8,7 @@ from gammapy.scripts import make_bg_cube_models
 from gammapy.background import CubeBackgroundModel
 
 
-DEBUG = 2 # 0: no output, 1: output, 2: run fast, 3: more verbose
+DEBUG = 2 # 0: no output, 1: output, 2: NOTHING, 3: more verbose
 GRAPH_DEBUG = 1 # 0: no plots, 1: make plots, 2: wait between steps (bins), 3: draw 3D scatter plots (not implemented)
 CLEAN_WORKING_DIR = 1 # remove existing observation and bg cube model files
 
@@ -87,6 +87,9 @@ def test_make_bg_cube_models():
     """
     gammapy-background-cube -h
     gammapy-make_bg_cube_models -h
+    gammapy-make_bg_cube_models -h
+    gammapy-make_bg_cube_models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std
+    gammapy-make_bg_cube_models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std --test True
     """
     # Need to make sure the working dir is clean, otherwise old
     # files could be mixed up in the new models!
@@ -97,8 +100,12 @@ def test_make_bg_cube_models():
         print(command)
         os.system(command)
 
-    make_bg_cube_models(loglevel='debug',
-                        fitspath=HESSFITS_MPP)
+    test = False
+    if DEBUG > 1:
+        # run fast (test mode)
+        test = True
+
+    make_bg_cube_models(fitspath=HESSFITS_MPP, test=test)
 
     if GRAPH_DEBUG:
         # check model: do some plots

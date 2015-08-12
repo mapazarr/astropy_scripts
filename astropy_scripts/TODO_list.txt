@@ -57,3 +57,11 @@ FAKE OBS:
  - make it work so that no HESS data is necessary
  - make it work with few data (few alt-az bins?), so that the scripts run fast
  - if this works, maybe I don't need the DEBUG variable any more, since I won't need DEBUG > 1 !!!! (I can probably also remove the DEBUG > 2 calls, right?)
+ -> TODO: what about IRFs (i.e. Aeff for the E_THRESH?)?!!! -> check: if they exist => use them, if not => use all events (no E_THRESH)
+
+
+in make_bg_cube_model in fill_events:
+ - with loop over runs + pick the columns I need instead of stack all events:
+   - I reduce the time of the job by ~ 1/2 (5 min vs 10)
+   - BUT I don't get nice printouts of progress bars (runs processed/total)
+     TODO: print smthg every 10 runs or so!!!
