@@ -54,7 +54,6 @@ obs_group_1.write('obs_groups.ecsv')
 # read
 obs_group_2 = ObservationGroups.read('obs_groups.ecsv')
 
-import IPython; IPython.embed()
 assert (obs_group_1.obs_groups_table == obs_group_2.obs_groups_table).all()
 
 print(obs_group.obs_groups_table)
