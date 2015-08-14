@@ -3,7 +3,12 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from astropy.coordinates import Angle
 from astropy.table import Table
-from gammapy.obs import ObservationGroups, ObservationGroupAxis
+from gammapy.obs import (ObservationTable, ObservationGroups,
+                         ObservationGroupAxis)
+from gammapy import datasets
+
+CACHE = 1 # set to 0 to ignore downloaded files in the cache
+          # (or use rm ~/.astropy/cache)
 
 alt = Angle([0, 30, 60, 90], 'degree')
 az = Angle([-90, 90, 270], 'degree')
@@ -43,12 +48,14 @@ print(obs_group.info)
 print(obs_group.obs_groups_table)
 
 # write
-obs_group.write('obs_groups.ecsv')
+obs_group_1 = obs_group
+obs_group_1.write('obs_groups.ecsv')
 
 # read
-obs_group = ObservationGroups.read('obs_groups.ecsv')
+obs_group_2 = ObservationGroups.read('obs_groups.ecsv')
 
-#import IPython; IPython.embed()
+import IPython; IPython.embed()
+assert (obs_group_1.obs_groups_table == obs_group_2.obs_groups_table).all()
 
 print(obs_group.obs_groups_table)
 print(obs_group.info)
@@ -73,4 +80,32 @@ print(obs_group.info)
 #print(axis_table.meta)
 #print(axis_table)
 
+# test apply observation groups to a dummy observation table
+# using file in gammapy-extra (I also could create a dummy table)
+infile = datasets.get_path('../test_datasets/obs/test_observation_table.fits',
+                             location='remote', cache=CACHE)
+obs_table = ObservationTable.read(infile)
+
+print()
+print(obs_table)
+
+# wrap azimuth angles to [-90, 270) deg
+# to match definition of azimuth grouping axis
+obs_table['AZ'] = Angle(obs_table['AZ']).wrap_at(Angle(270., 'degree'))
+
+obs_table_grouped = obs_group.group_observation_table(obs_table)
+
+# wrap azimuth angles back to [0, 360) deg
+obs_table['AZ'] = Angle(obs_table['AZ']).wrap_at(Angle(360., 'degree'))
+
+print()
+print(obs_table_grouped)
+
+assert len(obs_table) == len(obs_table_grouped)
+assert ((0 <= obs_table_grouped['GROUP_ID']) &
+        (obs_table_grouped['GROUP_ID'] < obs_group.n_groups)).all()
+
 print('Done.')
+
+# TODO in ObservationGroups class:
+    # add high level doc with printouts of the observation groups -> do it in the "future" inline command tool for obs groups!!!
