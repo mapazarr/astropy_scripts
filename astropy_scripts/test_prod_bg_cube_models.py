@@ -21,8 +21,8 @@ def bg_models_debug_plots():
 
     # read observation grouping
     indir = os.environ['PWD'] + '/'
-    infile = indir + 'bg_observation_groups.ecvs'
-    observation_groups = ObservationGroups.read('bg_observation_groups.ecvs')
+    infile = indir + 'bg_observation_groups.ecsv'
+    observation_groups = ObservationGroups.read('bg_observation_groups.ecsv')
 
     # loop over observation groups
     groups = observation_groups.list_of_groups
@@ -92,7 +92,7 @@ def test_make_bg_cube_models():
         print("Cleaning working dir.")
         #command = "rm bg_observation_table* bg_cube_model_alt* -fr"
         #command = "rm bg_observation_table.fits.gz splitted_obs_list/ bg_cube_models/ -fr"
-        command = "rm bg_observation_table.fits.gz bg_observation_groups.ecvs bg_observation_table_grouped.fits.gz bg_cube_models/ -fr"
+        command = "rm bg_observation_table.fits.gz bg_observation_groups.ecsv bg_observation_table_grouped.fits.gz bg_cube_models/ -fr"
         print(command)
         os.system(command)
 
