@@ -46,7 +46,7 @@ print(obs_group.obs_groups_table)
 obs_group.write('obs_groups.ecsv')
 
 # read
-obs_group = ObservationGroups.read('obs_groups.ecsv', format='obs_groups_def')
+obs_group = ObservationGroups.read('obs_groups.ecsv')
 
 #import IPython; IPython.embed()
 
