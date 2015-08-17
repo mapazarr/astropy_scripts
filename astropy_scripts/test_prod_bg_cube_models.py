@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from astropy.units import Quantity
 from astropy.coordinates import Angle
 from gammapy.scripts import make_bg_cube_models
-from gammapy.background import CubeBackgroundModel
+from gammapy.background import Cube
 from gammapy.obs import ObservationGroups
 
 
@@ -43,7 +43,7 @@ def bg_models_debug_plots():
         if not os.path.isfile(infile):
             print("WARNING, file not found: {}".format(infile))
             continue # skip the rest
-        bg_cube_model = CubeBackgroundModel.read(infile, format='table')
+        bg_cube_model = Cube.read(infile, format='table')
 
         fig, axes = plt.subplots(nrows=1, ncols=3)
         fig.set_size_inches(30., 8., forward=True)
