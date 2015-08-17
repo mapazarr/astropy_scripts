@@ -15,7 +15,7 @@ CLEAN_WORKING_DIR = 1 # remove existing observation and bg cube model files
 
 HESSFITS_MPP = '/home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std'
 
-def bg_models_debug_plots():
+def bg_cube_models_debug_plots():
 
     # TODO: call plot_bg_cube_model_comparison !!!
 
@@ -43,7 +43,7 @@ def bg_models_debug_plots():
         if not os.path.isfile(infile):
             print("WARNING, file not found: {}".format(infile))
             continue # skip the rest
-        bg_cube_model = Cube.read(infile, format='table')
+        bg_cube_model = Cube.read(infile, format='table', scheme='bg_cube')
 
         fig, axes = plt.subplots(nrows=1, ncols=3)
         fig.set_size_inches(30., 8., forward=True)
@@ -59,10 +59,10 @@ def bg_models_debug_plots():
         bg_cube_model.plot_image(energy=Quantity(50., 'TeV'), ax=axes[1])
 
         # plot spectra
-        bg_cube_model.plot_spectrum(det=Angle([0., 0.], 'degree'), ax=axes[2],
+        bg_cube_model.plot_spectrum(coord=Angle([0., 0.], 'degree'), ax=axes[2],
                                     style_kwargs=dict(color='blue',
                                                       label='(0, 0) deg'))
-        bg_cube_model.plot_spectrum(det=Angle([2., 2.], 'degree'), ax=axes[2],
+        bg_cube_model.plot_spectrum(coord=Angle([2., 2.], 'degree'), ax=axes[2],
                                     style_kwargs=dict(color='red',
                                                       label='(2, 2) deg'))
         axes[2].set_title('')
@@ -105,7 +105,7 @@ def test_make_bg_cube_models():
 
     if GRAPH_DEBUG:
         # check model: do some plots
-        bg_models_debug_plots()
+        bg_cube_models_debug_plots()
 
 
 if __name__ == '__main__':

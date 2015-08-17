@@ -2,13 +2,18 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from astropy.units import Quantity
 from astropy.coordinates import Angle
-from gammapy.background import CubeBackgroundModel
+from gammapy.background import Cube
 
 GRAPH_DEBUG = 0
 SAVE = 0
 
-input_dir1 = '/home/mapaz/astropy/working_dir/hess-host_scripts/pa_fits_prod01_results/bg_cube_models'
-input_dir2 = '/home/mapaz/HESS/fits_data/pa_fits_prod01/pa/Model_Deconvoluted_Prod26/Mpp_Std/background'
+#input_dir1 = '/home/mapaz/astropy/working_dir/hess-host_scripts/pa_fits_prod01_results/bg_cube_models'
+input_dir1 = '/home/mapaz/astropy/working_dir/hess-host_scripts/pa_fits_prod02_results/bg_cube_models'
+#input_dir2 = '/home/mapaz/HESS/fits_data/pa_fits_prod01/pa/Model_Deconvoluted_Prod26/Mpp_Std/background'
+input_dir2 = '/home/mapaz/HESS/fits_data/pa_fits_prod02/pa/Model_Deconvoluted_Prod26/Mpp_Std/background'
+
+# TODO: addapt to new mods of background cube classes!!!
+#       this tool could benefit from an interpolator method to find the correct obs group to compare!!! (TODO: elaborate more this TODO idea) !!!
 
 # alt az bin IDs for comparison
 alt_bin_ids = [7, 10, 13]
@@ -36,16 +41,16 @@ for i_alt in alt_bin_ids:
                     '_az' + str(i_az) + '.fits.gz'
         print('filename1', filename1)
         print('filename2', filename2)
-        bg_cube_model1 = CubeBackgroundModel.read(filename1, format='table')
-        bg_cube_model2 = CubeBackgroundModel.read(filename2, format='table')
+        bg_cube_model1 = Cube.read(filename1, format='table', scheme='bg_cube')
+        bg_cube_model2 = Cube.read(filename2, format='table', scheme='bg_cube')
 
         # compare binning
-        print("energy binning 1", bg_cube_model1.energy_bins)
-        print("energy binning 2", bg_cube_model2.energy_bins)
-        print("detector binning 1 Y", bg_cube_model1.dety_bins)
-        print("detector binning 2 Y", bg_cube_model2.dety_bins)
-        print("detector binning 1 X", bg_cube_model1.detx_bins)
-        print("detector binning 2 X", bg_cube_model2.detx_bins)
+        print("energy edges 1", bg_cube_model1.energy_edges)
+        print("energy edges 2", bg_cube_model2.energy_edges)
+        print("detector edges 1 Y", bg_cube_model1.coordy_edges)
+        print("detector edges 2 Y", bg_cube_model2.coordy_edges)
+        print("detector edges 1 X", bg_cube_model1.coordx_edges)
+        print("detector edges 2 X", bg_cube_model2.coordx_edges)
 
         # plot
         fig, axes = plt.subplots(nrows=2, ncols=3)
@@ -69,11 +74,11 @@ for i_alt in alt_bin_ids:
         # plot spectra
         #  rows: similar det bin
         #  cols: compare both files
-        bg_cube_model1.plot_spectrum(det=Angle([0., 0.], 'degree'), ax=axes[0, 2],
+        bg_cube_model1.plot_spectrum(coord=Angle([0., 0.], 'degree'), ax=axes[0, 2],
                                      style_kwargs=dict(color='blue',
                                                        label='model 1'))
         spec_title1 = axes[0, 2].get_title()
-        bg_cube_model2.plot_spectrum(det=Angle([0., 0.], 'degree'), ax=axes[0, 2],
+        bg_cube_model2.plot_spectrum(coord=Angle([0., 0.], 'degree'), ax=axes[0, 2],
                                     style_kwargs=dict(color='red',
                                                       label='model 2'))
         spec_title2 = axes[0, 2].get_title()
@@ -83,11 +88,11 @@ for i_alt in alt_bin_ids:
             axes[0, 2].set_title(spec_title1)
         axes[0, 2].legend()
 
-        bg_cube_model1.plot_spectrum(det=Angle([2., 2.], 'degree'), ax=axes[1, 2],
+        bg_cube_model1.plot_spectrum(coord=Angle([2., 2.], 'degree'), ax=axes[1, 2],
                                     style_kwargs=dict(color='blue',
                                                       label='model 1'))
         spec_title1 = axes[1, 2].get_title()
-        bg_cube_model2.plot_spectrum(det=Angle([2., 2.], 'degree'), ax=axes[1, 2],
+        bg_cube_model2.plot_spectrum(coord=Angle([2., 2.], 'degree'), ax=axes[1, 2],
                                     style_kwargs=dict(color='red',
                                                       label='model 2'))
         spec_title2 = axes[1, 2].get_title()
