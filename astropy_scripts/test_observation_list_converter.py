@@ -2,8 +2,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals) # python 2 as python 3
 from astropy.table import Table
 from gammapy.obs import (convert_obs_list_format_to_gammapy,
-                         convert_obs_list_hess_to_gammapy,
-                         DataStore)
+                         convert_obs_list_hess_to_gammapy)
+from gammapy.obs import DataStore
 
 # test: convert the H.E.S.S. runinfo.fits observation list
 # from the PA FITS production
