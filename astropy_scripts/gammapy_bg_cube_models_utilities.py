@@ -29,6 +29,7 @@ class CubeUtils():
         ref: http://stackoverflow.com/questions/25983218/scientific-notation-colorbar-in-matplotlib (!!!)
 
         TODO: generalize naming scheme for all kinds of cubes!!!
+        TODO: rename this file to gammapy_cube_utilities.py !!! (and update references to it in other scripts)!!!
 
         Parameters
         ----------

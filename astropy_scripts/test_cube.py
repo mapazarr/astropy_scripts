@@ -56,19 +56,22 @@ def bg_cube_model_plots(filename):
 def test_cube_class(filename):
     """Testing the tests for gammapy.
     """
-    # test shape of bg cube when reading a file
-    bg_cube_model = Cube.read(filename, format='table', scheme='bg_cube')
+    # test shape and scheme of bg cube when reading a file
+    scheme='bg_cube'
+    bg_cube_model = Cube.read(filename, format='table', scheme=scheme)
     print("bg_cube_model.data.shape", bg_cube_model.data.shape)
     print("len(bg_cube_model.data.shape)", len(bg_cube_model.data.shape))
     assert len(bg_cube_model.data.shape) == 3
     assert bg_cube_model.data.shape == (len(bg_cube_model.energy_edges) - 1,
                                               len(bg_cube_model.coordy_edges) - 1,
                                               len(bg_cube_model.coordx_edges) - 1)
+    assert bg_cube_model.scheme == scheme
 
     # example how to access data in cube
     energy_bin = bg_cube_model.find_energy_bin(energy=Quantity(2., 'TeV'))
     coord_bin = bg_cube_model.find_coord_bin(coord=Angle([0., 0.], 'degree'))
     bg_cube_model.data[energy_bin, coord_bin[1], coord_bin[0]]
+
 
     # test image plot:
     # test bg rate values plotted for image plot of energy bin conaining E = 2 TeV
@@ -129,7 +132,7 @@ def test_cube_class(filename):
     else:
         outfile = NamedTemporaryFile(suffix='.fits').name
     print("Writing file {}".format(outfile))
-    bg_cube_model.write(outfile, format='table', clobber=True) # overwrite
+    bg_cube_model_1.write(outfile, format='table', clobber=True) # overwrite
     bg_cube_model_2 = Cube.read(outfile, format='table', scheme='bg_cube')
     assert_quantity_allclose(bg_cube_model_2.data, bg_cube_model_1.data)
     assert_quantity_allclose(bg_cube_model_2.coordx_edges, bg_cube_model_1.coordx_edges)
