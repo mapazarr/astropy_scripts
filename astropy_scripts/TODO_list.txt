@@ -65,3 +65,8 @@ in make_bg_cube_model in fill_events:
    - I reduce the time of the job by ~ 1/2 (5 min vs 10)
    - BUT I don't get nice printouts of progress bars (runs processed/total)
      TODO: print smthg every 10 runs or so!!!
+
+
+tests TODO:
+
+- CubeBackgroundModel write + read back !!! (for table and image formats)
