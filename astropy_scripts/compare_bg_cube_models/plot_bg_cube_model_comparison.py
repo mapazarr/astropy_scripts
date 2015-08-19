@@ -55,6 +55,11 @@ for i_alt in alt_bin_ids:
         print("detector edges 1 X", bg_cube_model1.coordx_edges)
         print("detector edges 2 X", bg_cube_model2.coordx_edges)
 
+        # TODO: check that both cubes use the same units!!!
+        #       this comes from:
+        #       # TODO: use TeV!!! (actually: don't specify energy units!!!)
+        #       in Cube.divide_bin_volume
+
         # plot
         fig, axes = plt.subplots(nrows=2, ncols=3)
         fig.set_size_inches(30., 15., forward=True)
