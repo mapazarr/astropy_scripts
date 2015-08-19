@@ -14,6 +14,9 @@ input_dir2 = '/home/mapaz/HESS/fits_data/pa_fits_prod02/pa/Model_Deconvoluted_Pr
 
 # TODO: addapt to new mods of background cube classes!!!
 #       this tool could benefit from an interpolator method to find the correct obs group to compare!!! (TODO: elaborate more this TODO idea) !!!
+# TODO: use the info_group method (like in test_prod_bg_cube_models.py):
+#       group_info = observation_groups.info_group(group)
+#       plt.suptitle(group_info)
 
 # alt az bin IDs for comparison
 alt_bin_ids = [7, 10, 13]

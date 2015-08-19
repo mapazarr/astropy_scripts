@@ -48,7 +48,9 @@ def bg_cube_models_debug_plots():
         fig, axes = plt.subplots(nrows=1, ncols=3)
         fig.set_size_inches(30., 8., forward=True)
         #plt.suptitle('altitude bin {0} azimuth bin {1}'.format(i_alt, i_az))
-        plt.suptitle('group {}'.format(group))
+        #plt.suptitle('group {}'.format(group))
+        group_info = observation_groups.info_group(group)
+        plt.suptitle(group_info)
         # TODO: it would be nice to get a nice string from an obs group!!!
         #       and in this case pack it in the figure title
         #       I think this also applies to the script for comparing plots!!!
