@@ -128,9 +128,19 @@ TODOs from dummy dataset generator (gammapy/datasets/make.py):
 
     # see also "FAKE OBS" ideas listed above
 
-    # tests: add more tests (check the event lists and their contents)!!!
+    # tests: add more tests (check the event lists/aeff tables and their contents)!!!
     #        also the obs list file!!!
 
 
 for gammapy obs:
  TODO: reconcile OBSERVATORY_NAME = 'HESS' from ObservationTable with scheme = 'hess' from DataStore!!!
+
+for bg cube generator:
+    # TODO: implement better tests!!! (add some asserts!!!)
+    in create_bg_observation_list:
+    TODO: on a second version, one could only filter out the runs
+          too close to the galacic plane, and afterwards use masks
+          to cut out sources, for runs taken on extragalactic objects
+          (correcting the livetime accordingly).
+
+    TODO: move function to background/obs module? But where?!!!

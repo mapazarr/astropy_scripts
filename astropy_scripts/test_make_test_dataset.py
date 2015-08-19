@@ -14,8 +14,8 @@ n_obs = 2
 datestart = None
 dateend = None
 #random_state = 'random-seed'
-#random_state = 0
-random_state = np.random.RandomState(seed=0) # this is equivalent
+random_state = np.random.RandomState(seed=0)
+#random_state = 0 # this is equivalent
 
 fits_path = '/home/mapaz/astropy/development_code/astropy_scripts/astropy_scripts/' + 'test_dataset'
 overwrite = False
@@ -53,4 +53,16 @@ print(observation_table)
 assert len(observation_table) == n_obs
 
 # print event lists and effective area tables
-# TODO!!!
+event_list_files = data_store.make_table_of_files(observation_table,
+                                                  filetypes=['events'])
+aeff_table_files = data_store.make_table_of_files(observation_table,
+                                                  filetypes=['effective area'])
+for i_ev_file, i_aeff_file in zip(event_list_files['filename'],
+                                  aeff_table_files['filename']):
+    print(' ev infile: {}'.format(i_ev_file))
+    print(' aeff infile: {}'.format(i_aeff_file))
+
+# test number of event list and effective area table files created
+
+assert len(event_list_files) == n_obs
+assert len(aeff_table_files) == n_obs
