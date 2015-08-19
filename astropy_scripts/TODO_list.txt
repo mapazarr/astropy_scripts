@@ -131,6 +131,9 @@ TODOs from dummy dataset generator (gammapy/datasets/make.py):
     # tests: add more tests (check the event lists/aeff tables and their contents)!!!
     #        also the obs list file!!!
 
+    # TODO: use the logger and remove the DEBUG option!!!
+    #       Look how the DataStore prints the loading bar (when importing a file).
+
 
 for gammapy obs:
  TODO: reconcile OBSERVATORY_NAME = 'HESS' from ObservationTable with scheme = 'hess' from DataStore!!!
@@ -171,3 +174,11 @@ from observation.py:
     # format will be reviewed in a further step
     # TODO: maybe it's better to store/read the parameter
     #       format in/from the table header?!!!
+
+models.py:
+ - define_cube_binnig
+    Dummy binning for tests
+    #    if DEBUG > 1:
+    #        energy_edges = Quantity([0.01, 0.1, 1., 10., 100.], 'TeV') # log binning
+    #        dety_edges = Angle(np.arange(-5., 6., 1.), 'degree') # stops at 5
+    #        detx_edges = Angle(np.arange(-5., 6., 1.), 'degree') # stops at 5

@@ -31,11 +31,10 @@ def bg_cube_models_debug_plots(indir):
     """
     # TODO: call plot_bg_cube_model_comparison !!!
 
-    if DEBUG:
-        print()
-        print("#######################################")
-        print("# Starting bg_cube_models_debug_plots #")
-        print("#######################################")
+    print()
+    print("#######################################")
+    print("# Starting bg_cube_models_debug_plots #")
+    print("#######################################")
 
     # read observation grouping
     infile = indir + '/bg_observation_groups.ecsv'
