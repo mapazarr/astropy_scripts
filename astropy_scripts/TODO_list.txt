@@ -62,7 +62,7 @@ FAKE OBS:
  -> TODO: what about IRFs (i.e. Aeff for the E_THRESH?)?!!! -> check: if they exist => use them, if not => use all events (no E_THRESH)
 
 
-in make_bg_cube_model in fill_events:
+in CubeBackgroundModel in fill_events:
  - with loop over runs + pick the columns I need instead of stack all events:
    - I reduce the time of the job by ~ 1/2 (5 min vs 10)
    - BUT I don't get nice printouts of progress bars (runs processed/total)
@@ -144,3 +144,30 @@ for bg cube generator:
           (correcting the livetime accordingly).
 
     TODO: move function to background/obs module? But where?!!!
+
+
+from make_bg_cube_models.py (inline commando tool script):
+ - create_bg_observation_list:
+    # TODO: is there a way to quickly filter out catalog sources in a region of the sky, where H.E.S.S. can't observe????!!!! -> don't loose too much time on this (detail)
+    #       this could save some time, when producing the observation list for the cubes
+    # TODO: the catalog source filtering/selection could be an option for find-obs (and a function in the ObservationTable class)!!!
+
+ - stack_observations:
+    # TODO: bg cube file names won't match the names from michael mayer!!! (also the observation lists: split/unsplit)
+    #       the current naming makes it difficult to compare 2 sets of cubes!!!
+    # TODO: support 2 namings: groupX, or axis1X_axis2Y_etc !!!
+    #       this is still not perfect, since the same var with  different binning produces the same indexing, but it's at least something (and helps comparing to Michi, if the same binning is used)
+    # add flag split obs list in observation_groups.group_observation_table??!!!
+
+from observation.py:
+ - recover_units:
+    TODO: extend the functionality of the function to work with Time arrays.
+ - ObservationGroups:
+    TODO: show a grouped obs list and a table of obs groups in the high-level docs
+    (and a list of axes)!!!!
+    (do it in the "future" page for the "future" inline command tool
+    for obs groups!!!)
+ - table_to_axes:
+    # format will be reviewed in a further step
+    # TODO: maybe it's better to store/read the parameter
+    #       format in/from the table header?!!!
