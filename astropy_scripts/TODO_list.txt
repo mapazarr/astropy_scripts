@@ -130,3 +130,7 @@ TODOs from dummy dataset generator (gammapy/datasets/make.py):
 
     # tests: add more tests (check the event lists and their contents)!!!
     #        also the obs list file!!!
+
+
+for gammapy obs:
+ TODO: reconcile OBSERVATORY_NAME = 'HESS' from ObservationTable with scheme = 'hess' from DataStore!!!

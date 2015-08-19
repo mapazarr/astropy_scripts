@@ -1,23 +1,35 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals) # python 2 as python 3
 import os
+import numpy as np
 import matplotlib.pyplot as plt
 from astropy.units import Quantity
 from astropy.coordinates import Angle
 from gammapy.scripts import make_bg_cube_models
 from gammapy.background import Cube
 from gammapy.obs import ObservationGroups
+from gammapy.datasets import make_test_dataset
 
 
 DEBUG = 2 # 0: no output, 1: output, 2: NOTHING, 3: more verbose
 GRAPH_DEBUG = 1 # 0: no plots, 1: make plots, 2: wait between steps (bins), 3: draw 3D scatter plots (not implemented)
 CLEAN_WORKING_DIR = 1 # remove existing observation and bg cube model files
+USE_DUMMY_DATA = 1
 
 HESSFITS_MPP = '/home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std'
+DUMMYFITS = '/home/mapaz/astropy/development_code/astropy_scripts/astropy_scripts/' + 'test_dataset'
+SCHEME = 'hess'
+OBSERVATORY_NAME = 'HESS' # in case USE_DUMMY_DATA is activated
 
 def bg_cube_models_debug_plots():
 
     # TODO: call plot_bg_cube_model_comparison !!!
+
+    if DEBUG:
+        print()
+        print("#######################################")
+        print("# Starting bg_cube_models_debug_plots #")
+        print("#######################################")
 
     # read observation grouping
     indir = os.environ['PWD'] + '/'
@@ -85,8 +97,8 @@ def test_make_bg_cube_models():
     gammapy-background-cube -h
     gammapy-make_bg_cube_models -h
     gammapy-make_bg_cube_models -h
-    gammapy-make_bg_cube_models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std
-    gammapy-make_bg_cube_models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std --test True
+    gammapy-make_bg_cube_models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std hess
+    gammapy-make_bg_cube_models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std hess --test True
     """
     # Need to make sure the working dir is clean, otherwise old
     # files could be mixed up in the new models!
@@ -97,13 +109,39 @@ def test_make_bg_cube_models():
         command = "rm bg_observation_table.fits.gz bg_observation_groups.ecsv bg_observation_table_grouped.fits.gz bg_cube_models/ -fr"
         print(command)
         os.system(command)
+        if USE_DUMMY_DATA:
+          print("Deleting dummy data dir.")
+          command = "rm test_dataset -fr"
+          print(command)
+          os.system(command)
 
     test = False
     if DEBUG > 1:
         # run fast (test mode)
         test = True
 
-    make_bg_cube_models(fitspath=HESSFITS_MPP, test=test)
+    fits_path = HESSFITS_MPP
+
+    if USE_DUMMY_DATA:
+        # update fits path and generate dataset
+        fits_path = DUMMYFITS
+        overwrite = False
+        #n_obs = 10
+        n_obs = 2
+        datestart = None
+        dateend = None
+        #random_state = 'random-seed'
+        #random_state = 0 # this is not deterministic!!!
+        random_state = np.random.RandomState(seed=0)
+        make_test_dataset(fits_path=fits_path,
+                          overwrite=overwrite,
+                          observatory_name=OBSERVATORY_NAME,
+                          n_obs=n_obs,
+                          datestart=datestart,
+                          dateend=dateend,
+                          random_state=random_state)
+
+    make_bg_cube_models(fitspath=fits_path, scheme=SCHEME, test=test)
 
     if GRAPH_DEBUG:
         # check model: do some plots
