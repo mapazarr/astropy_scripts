@@ -1,5 +1,7 @@
 """
 Script to produce plots comparing 2 sets of background cube models.
+
+Details in stringdoc of the plot_bg_cube_model_comparison function.
 """
 
 import numpy as np
@@ -9,7 +11,8 @@ from astropy.units import Quantity
 from astropy.coordinates import Angle
 from astropy.table import Table
 from astropy.io import ascii
-from gammapy.background import Cube
+from gammapy.background import CubeBackgroundModel
+
 from gammapy.obs import ObservationGroups, ObservationGroupAxis
 
 GRAPH_DEBUG = 0
@@ -21,21 +24,17 @@ binning_format1 = 'a_la_gammapy'
 input_dir2 = '/home/mapaz/HESS/fits_data/pa_fits_prod02/pa/Model_Deconvoluted_Prod26/Mpp_Std/background'
 binning_format2 = 'a_la_michi'
 
-# TODO: addapt to new mods of background cube classes!!!
-#       this tool could benefit from an interpolator method to find the correct obs group to compare!!! (TODO: elaborate more this TODO idea) !!!
-# TODO: use the info_group method (like in test_prod_bg_cube_models.py):
-#       group_info = observation_groups.info_group(group)
-#       plt.suptitle(group_info)
-
-# observation groups binning definition "a_la_michi"
-
 # group IDs for comparison
-# corresponding to the cartesian product of the following
+
+#  The following group IDs
+#  - group_ids_selection = [14, 15, 20, 21, 26, 27]
+# correspond to the cartesian product of the following
 # "a_la_michi" alt az bin IDs:
 #  - alt_bin_ids_selection = [7, 10, 13]
 #  - az_bin_ids_selection = [0, 1]
 group_ids_selection = [14, 15, 20, 21, 26, 27]
 
+# observation groups binning definition "a_la_michi"
 
 # alt az bin edges definitions
 altitude_edges = Angle([0, 20, 23, 27, 30, 33, 37, 40, 44, 49, 53, 58, 64, 72, 90], 'degree')
@@ -118,20 +117,60 @@ def plot_bg_cube_model_comparison():
     """
     Plot background cube model comparison.
 
-    TODO: more!!! plot strategy !!!
+    Produce a few figures for comparing 2 sets of bg cube models (1
+    and 2), supposing same binning in both sets of observation
+    groups (a.k.a. observation bin).
 
-    TODO: option to do more plots!!!
-          plot all bins of all groups!!! or what???!!!
+    Each figure corresponds to 1 observation group.
+    Plot strategy in each figure:
 
-    TODO: describe!!!
+    * Images:
+        * rows: similar energy bin
+        * cols: same bg cube model set
+    * Spectra:
+        * rows: similar det bin
+        * cols: compare both bg cube model sets
 
-    Supposing same binning in both sets of observation groups.
+    TODO: options to do more plots:
 
-    explain binning!!!!!!!!!
+    * plot all groups:
+        * leave 'group_ids_selection' empty
+    * plot all bins:
+        * USE 'CubeUtils' IN gammapy_bg_cube_models_utilities.py
+          (TODO!!!)
 
-    explain global variables!!!
+    The script can be customized by setting a few global variables:
 
-    add link to this script in the high-level docs!!!
+    * **input_dir1**, **input_dir2**: directory where the
+      corresponding set of bg cube models is stored.
+
+    * **binning_format1**, **binning_format2**: binning format;
+      accepted values are:
+          * *a_la_gammapy* for the Gammapy format from
+            `~gammapy.obs.ObservationGroups`; an observation groups
+            ECVS file is expected in the bg cube models dir.
+          * *a_la_michi* for the binning used by Michale Mayer;
+            this script has methods to convert it to the
+            *a_la_gammapy* format.
+            ref: [Mayer2015]_ (section 5.2.4)
+
+    * **group_ids_selection**: groups to compare; if empty: use all
+      groups
+
+    * **SAVE**: set to 1 (True) to save the output:
+          * comparison plots as png
+          * *a_la_michi* binning groups and lookup as ECVS files
+
+    * **GRAPH_DEBUG**: if set to 1 (True) the program waits between
+      each observation group iteration until the image is closed
+
+    References
+    ==========
+
+    .. [Mayer2015] `Michael Mayer (2015) <https://publishup.uni-potsdam.de/frontdoor/index/index/docId/7150>`_
+       "Pulsar wind nebulae at high energies"
+
+    TODO: argparser to avoid that many global variables
     """
     # check binning
     accepted_binnings = ['a_la_gammapy', 'a_la_michi']
@@ -154,7 +193,12 @@ def plot_bg_cube_model_comparison():
         print()
         print("group ", group)
         # compare only observation groups in group IDs selection
-        if group in group_ids_selection:
+        # if empty, use all groups:
+        if len(group_ids_selection) is not 0:
+            groups_to_compare = group_ids_selection
+        else :
+            groups_to_compare = groups
+        if group in groups_to_compare:
             group_info = observation_groups.info_group(group)
             print(group_info)
 
@@ -177,12 +221,10 @@ def plot_bg_cube_model_comparison():
                             '_table.fits.gz'
             print('filename1', filename1)
             print('filename2', filename2)
-            bg_cube_model1 = Cube.read(filename1, format='table', scheme='bg_cube')
-            bg_cube_model2 = Cube.read(filename2, format='table', scheme='bg_cube')
-            # TODO: use the new CubeBackgroundModel class???!!!
-            #from gammapy.background import CubeBackgroundModel
-            #bg_cube_model1 = Cube.read(filename1, format='table').background_cube
-            #bg_cube_model2 = Cube.read(filename2, format='table').background_cube
+            bg_cube_model1 = CubeBackgroundModel.read(filename1,
+                                                      format='table').background_cube
+            bg_cube_model2 = CubeBackgroundModel.read(filename2,
+                                                      format='table').background_cube
 
             # compare binning
             print("energy edges 1", bg_cube_model1.energy_edges)
