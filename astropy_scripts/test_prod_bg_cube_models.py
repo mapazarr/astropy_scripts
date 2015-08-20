@@ -18,7 +18,7 @@ USE_DUMMY_DATA = 1
 
 HESSFITS_MPP = '/home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std'
 DUMMYFITS = '/home/mapaz/astropy/development_code/astropy_scripts/astropy_scripts/' + 'test_dataset'
-SCHEME = 'hess'
+SCHEME = 'HESS'
 OBSERVATORY_NAME = 'HESS' # in case USE_DUMMY_DATA is activated
 
 def bg_cube_models_debug_plots(indir):
@@ -98,9 +98,10 @@ def bg_cube_models_debug_plots(indir):
 def test_make_bg_cube_models():
     """
     gammapy-make-bg-cube-models -h
-    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std hess bg_cube_models
-    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std hess bg_cube_models --test True
-    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std hess bg_cube_models --test True --overwrite
+    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std HESS bg_cube_models
+    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std HESS bg_cube_models --test
+    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std HESS bg_cube_models --test --overwrite
+    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std HESS bg_cube_models --a-la-michi
     """
     # Need to make sure the working dir is clean, otherwise old
     # files could be mixed up in the new models!
@@ -127,6 +128,8 @@ def test_make_bg_cube_models():
     #outdir = os.environ['PWD'] + '/bg_cube_models/'
     outdir = 'bg_cube_models'
     overwrite = False
+    a_la_michi = False
+    #a_la_michi = True
 
     if USE_DUMMY_DATA:
         # update fits path and generate dataset
@@ -146,7 +149,7 @@ def test_make_bg_cube_models():
                           dateend=dateend,
                           random_state=random_state)
 
-    make_bg_cube_models(fitspath=fits_path, scheme=SCHEME, outdir=outdir, overwrite=overwrite, test=test)
+    make_bg_cube_models(fitspath=fits_path, scheme=SCHEME, outdir=outdir, overwrite=overwrite, test=test, a_la_michi=a_la_michi)
 
     if GRAPH_DEBUG:
         # check model: do some plots
