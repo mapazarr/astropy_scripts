@@ -15,6 +15,7 @@ DEBUG = 0 # 0: normal, 1: run fast (test mode)
 GRAPH_DEBUG = 1 # 0: no plots, 1: make plots, 2: wait between steps (bins), 3: draw 3D scatter plots (not implemented)
 CLEAN_WORKING_DIR = 1 # remove existing observation and bg cube model files
 USE_DUMMY_DATA = 0 # to use dummy dataset
+A_LA_MICHI = 0 # to use Michael Mayer's method to produce the cubes
 
 HESSFITS_MPP = '/home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std'
 DUMMYFITS = '/home/mapaz/astropy/development_code/astropy_scripts/astropy_scripts/' + 'test_dataset'
@@ -126,8 +127,7 @@ def test_make_bg_cube_models():
     #outdir = os.environ['PWD'] + '/bg_cube_models/'
     outdir = 'bg_cube_models'
     overwrite = False
-    #a_la_michi = False
-    a_la_michi = True
+    a_la_michi = A_LA_MICHI
 
     if USE_DUMMY_DATA:
         # update fits path and generate dataset
