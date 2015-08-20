@@ -6,7 +6,7 @@ Details in stringdoc of the plot_bg_cube_model_comparison function.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+#from matplotlib.colors import LogNorm
 from astropy.units import Quantity
 from astropy.coordinates import Angle
 from astropy.table import Table
@@ -82,6 +82,7 @@ if SAVE:
     ascii.write(lookup_obs_groups_a_la_michi, outfile,
                 format='ecsv', fast_writer=False)
 
+
 def look_obs_groups_a_la_michi(group_id):
     """
     Find corresponding ALT_ID, AZ_ID for a given GROUP_ID in lookup table.
@@ -100,7 +101,7 @@ def look_obs_groups_a_la_michi(group_id):
     """
     # find group row in lookup table
     group_ids = lookup_obs_groups_a_la_michi['GROUP_ID'].data
-    group_index = np.where(group_ids==group_id)
+    group_index = np.where(group_ids == group_id)
     row = group_index[0][0]
     i_alt = lookup_obs_groups_a_la_michi['ALT_ID'][row]
     i_az = lookup_obs_groups_a_la_michi['AZ_ID'][row]
@@ -196,7 +197,7 @@ def plot_bg_cube_model_comparison():
         # if empty, use all groups:
         if len(group_ids_selection) is not 0:
             groups_to_compare = group_ids_selection
-        else :
+        else:
             groups_to_compare = groups
         if group in groups_to_compare:
             group_info = observation_groups.info_group(group)
@@ -244,7 +245,7 @@ def plot_bg_cube_model_comparison():
             fig, axes = plt.subplots(nrows=2, ncols=3)
             fig.set_size_inches(30., 15., forward=True)
             plt.suptitle(group_info)
-    
+
             # plot images
             #  rows: similar energy bin
             #  cols: same file
@@ -258,7 +259,7 @@ def plot_bg_cube_model_comparison():
             axes[0, 1].set_title("model 2: {}".format(axes[0, 1].get_title()))
             bg_cube_model2.plot_image(energy=Quantity(50., 'TeV'), ax=axes[1, 1])
             axes[1, 1].set_title("model 2: {}".format(axes[1, 1].get_title()))
-    
+
             # plot spectra
             #  rows: similar det bin
             #  cols: compare both files
@@ -273,11 +274,13 @@ def plot_bg_cube_model_comparison():
                                                            label='model 2'))
             spec_title2 = axes[0, 2].get_title()
             if spec_title1 != spec_title2:
-                raise ValueError("Expected same det binning, but got \"{0}\" and \"{1}\"".format(spec_title1, spec_title2))
+                s_error = "Expected same det binning, but got "
+                s_error += "\"{0}\" and \"{1}\"".format(spec_title1, spec_title2)
+                raise ValueError(s_error)
             else:
                 axes[0, 2].set_title(spec_title1)
             axes[0, 2].legend()
-    
+
             bg_cube_model1.plot_spectrum(coord=Angle([2., 2.], 'degree'),
                                          ax=axes[1, 2],
                                          style_kwargs=dict(color='blue',
@@ -289,20 +292,22 @@ def plot_bg_cube_model_comparison():
                                                            label='model 2'))
             spec_title2 = axes[1, 2].get_title()
             if spec_title1 != spec_title2:
-                raise ValueError("Expected same det binning, but got \"{0}\" and \"{1}\"".format(spec_title1, spec_title2))
+                s_error = "Expected same det binning, but got "
+                s_error += "\"{0}\" and \"{1}\"".format(spec_title1, spec_title2)
+                raise ValueError(s_error)
             else:
                 axes[1, 2].set_title(spec_title1)
             axes[1, 2].legend()
-    
+
             if GRAPH_DEBUG:
                 plt.show() # wait until image is closed
-    
+
             if SAVE:
                 outfile = "bg_cube_model_comparison_alt{0}_az{1}.png".format(i_alt,
                                                                              i_az)
                 print('Writing {}'.format(outfile))
                 fig.savefig(outfile)
-    
+
     plt.show() # don't leave at the end
 
 
