@@ -11,10 +11,10 @@ from gammapy.obs import ObservationGroups
 from gammapy.datasets import make_test_dataset
 
 
-DEBUG = 2 # 0: no output, 1: output, 2: run fast, 3: more verbose
+DEBUG = 0 # 0: normal, 1: run fast (test mode)
 GRAPH_DEBUG = 1 # 0: no plots, 1: make plots, 2: wait between steps (bins), 3: draw 3D scatter plots (not implemented)
 CLEAN_WORKING_DIR = 1 # remove existing observation and bg cube model files
-USE_DUMMY_DATA = 1
+USE_DUMMY_DATA = 0 # to use dummy dataset
 
 HESSFITS_MPP = '/home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std'
 DUMMYFITS = '/home/mapaz/astropy/development_code/astropy_scripts/astropy_scripts/' + 'test_dataset'
@@ -42,14 +42,12 @@ def bg_cube_models_debug_plots(indir):
 
     # loop over observation groups
     groups = observation_groups.list_of_groups
-    if DEBUG:
-        print()
-        print("list of groups", groups)
+    print()
+    print("list of groups", groups)
 
     for group in groups:
-        if DEBUG:
-            print()
-            print("group", group)
+        print()
+        print("group", group)
 
         # read bg cube model from file
         infile = indir +\
@@ -120,7 +118,7 @@ def test_make_bg_cube_models():
           os.system(command)
 
     test = False
-    if DEBUG > 1:
+    if DEBUG:
         # run fast (test mode)
         test = True
 
@@ -128,14 +126,16 @@ def test_make_bg_cube_models():
     #outdir = os.environ['PWD'] + '/bg_cube_models/'
     outdir = 'bg_cube_models'
     overwrite = False
-    a_la_michi = False
-    #a_la_michi = True
+    #a_la_michi = False
+    a_la_michi = True
 
     if USE_DUMMY_DATA:
         # update fits path and generate dataset
         fits_path = DUMMYFITS
-        #n_obs = 10
-        n_obs = 2
+        n_obs = 10
+        if DEBUG:
+            # run fast (test mode)
+            n_obs = 2
         datestart = None
         dateend = None
         #random_state = 'random-seed'
