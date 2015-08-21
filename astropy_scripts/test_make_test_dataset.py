@@ -8,7 +8,7 @@ from gammapy.obs import DataStore
 CLEAN_WORKING_DIR = 1 # remove existing dataset dir
 
 observatory_name = 'HESS'
-scheme = 'hess'
+scheme = 'HESS'
 #n_obs = 10
 n_obs = 2
 datestart = None

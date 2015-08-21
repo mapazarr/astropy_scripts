@@ -271,7 +271,7 @@ def test_remote_data():
     print()
     # checks (remotely) in gammapy/gammapy-extra/datasets
     #remote_path = datasets.get_path('bg_cube_model_test.fits', location='remote', cache=CACHE)
-    remote_path = datasets.get_path('../test_datasets/background/bg_cube_model_test.fits', location='remote', cache=CACHE)
+    remote_path = datasets.get_path('../test_datasets/background/bg_cube_model_test1.fits', location='remote', cache=CACHE)
     print("remote_path", remote_path)
 
 
@@ -290,7 +290,7 @@ if __name__ == '__main__':
     #DIR = '/home/mapaz/astropy/development_code/gammapy/gammapy/background/tests/data/'
     #filename = DIR + 'bg_test.fits'
     #filename = DIR + 'bkgcube.fits' # not supported!
-    filename = '../test_datasets/background/bg_cube_model_test.fits'
+    filename = '../test_datasets/background/bg_cube_model_test1.fits'
     filename = datasets.get_path(filename, location='remote', cache=CACHE)
     #DIR = '/home/mapaz/astropy/development_code/gammapy-extra/test_datasets/background/'
     #filename = DIR + 'bg_cube_model_test.fits'

@@ -25,7 +25,7 @@ print("obs_table")
 print(obs_table.meta)
 print(obs_table)
 
-obs_table = convert_obs_list_format_to_gammapy(obs_list, scheme='hess')
+obs_table = convert_obs_list_format_to_gammapy(obs_list, scheme='HESS')
 
 print()
 print("obs_table")

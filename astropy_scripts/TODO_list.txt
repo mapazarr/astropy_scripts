@@ -131,6 +131,9 @@ TODOs from dummy dataset generator (gammapy/datasets/make.py):
     # tests: add more tests (check the event lists/aeff tables and their contents)!!!
     #        also the obs list file!!!
 
+    # TODO: use the logger and remove the DEBUG option!!!
+    #       Look how the DataStore prints the loading bar (when importing a file).
+
 
 for gammapy obs:
  TODO: reconcile OBSERVATORY_NAME = 'HESS' from ObservationTable with scheme = 'hess' from DataStore!!!
@@ -171,3 +174,22 @@ from observation.py:
     # format will be reviewed in a further step
     # TODO: maybe it's better to store/read the parameter
     #       format in/from the table header?!!!
+ - for the group creation (cartesian product): meshgrid didn't work.
+   but maybe this works:
+   https://docs.python.org/3.6/library/itertools.html#itertools.product
+   https://github.com/gammapy/gammapy/pull/319#discussion-diff-37474954
+
+models.py:
+ - define_cube_binnig
+    Dummy binning for tests (would the bg cube model prod go faster with a coarse binning in the cubes?)
+    #    if DEBUG > 1:
+    #        energy_edges = Quantity([0.01, 0.1, 1., 10., 100.], 'TeV') # log binning
+    #        dety_edges = Angle(np.arange(-5., 6., 1.), 'degree') # stops at 5
+    #        detx_edges = Angle(np.arange(-5., 6., 1.), 'degree') # stops at 5
+
+    TODO: if I modify the scripts to add custom binning, I need to update the "a_la_michi" doc!!!!
+
+    TODO: a function test_cube that implements in a generic way all tests/asserts for 1 cube, then call it everywhere one cube needs to be tested; it could be a member of the Cube class, rigth?
+    TODO: the same for CubeBackgroundModel class!!!
+
+    TODO: the test of the smooth function will fail, once the smoothing method changes (unless I upload a newfile to gammapy-extra)!!!

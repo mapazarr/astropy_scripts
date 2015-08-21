@@ -30,9 +30,6 @@ print(alt_obs_group_axis_from_col.to_column())
 print("ALT from col bins", alt_obs_group_axis.bins)
 
 print()
-alt_obs_group_axis.print() # not working?
-az_obs_group_axis.print() # not working?
-ntels_obs_group_axis.print() # not working?
 print(alt_obs_group_axis.info)
 print(az_obs_group_axis.info)
 print(ntels_obs_group_axis.info)
@@ -40,24 +37,22 @@ print(ntels_obs_group_axis.info)
 list_obs_group_axis = [alt_obs_group_axis, az_obs_group_axis, ntels_obs_group_axis]
 array_obs_group_axis = np.array([alt_obs_group_axis, az_obs_group_axis, ntels_obs_group_axis])
 
-obs_group = ObservationGroups(list_obs_group_axis)
+obs_groups = ObservationGroups(list_obs_group_axis)
 
-obs_group.print_groups() # works?
-obs_group.print_axes() # not working?
-print(obs_group.info)
-print(obs_group.obs_groups_table)
+print(obs_groups.info)
+print(obs_groups.obs_groups_table)
 
 # write
-obs_group_1 = obs_group
-obs_group_1.write('obs_groups.ecsv')
+obs_groups_1 = obs_groups
+obs_groups_1.write('obs_groups.ecsv')
 
 # read
-obs_group_2 = ObservationGroups.read('obs_groups.ecsv')
+obs_groups_2 = ObservationGroups.read('obs_groups.ecsv')
 
-assert (obs_group_1.obs_groups_table == obs_group_2.obs_groups_table).all()
+assert (obs_groups_1.obs_groups_table == obs_groups_2.obs_groups_table).all()
 
-print(obs_group.obs_groups_table)
-print(obs_group.info)
+print(obs_groups.obs_groups_table)
+print(obs_groups.info)
 
 
 # test columns of different lengths:
@@ -92,7 +87,7 @@ print(obs_table)
 # to match definition of azimuth grouping axis
 obs_table['AZ'] = Angle(obs_table['AZ']).wrap_at(Angle(270., 'degree'))
 
-obs_table_grouped = obs_group.group_observation_table(obs_table)
+obs_table_grouped = obs_groups.group_observation_table(obs_table)
 
 # wrap azimuth angles back to [0, 360) deg
 obs_table['AZ'] = Angle(obs_table['AZ']).wrap_at(Angle(360., 'degree'))
@@ -102,9 +97,10 @@ print(obs_table_grouped)
 
 assert len(obs_table) == len(obs_table_grouped)
 assert ((0 <= obs_table_grouped['GROUP_ID']) &
-        (obs_table_grouped['GROUP_ID'] < obs_group.n_groups)).all()
+        (obs_table_grouped['GROUP_ID'] < obs_groups.n_groups)).all()
+
+obs_table_group8 = obs_groups.get_group_of_observations(obs_table_grouped, 8)
+print()
+print(obs_table_group8)
 
 print('Done.')
-
-# TODO in ObservationGroups class:
-    # add high level doc with printouts of the observation groups -> do it in the "future" inline command tool for obs groups!!!

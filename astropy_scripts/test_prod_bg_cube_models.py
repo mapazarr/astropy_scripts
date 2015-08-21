@@ -6,19 +6,21 @@ import matplotlib.pyplot as plt
 from astropy.units import Quantity
 from astropy.coordinates import Angle
 from gammapy.scripts import make_bg_cube_models
-from gammapy.background import Cube
+from gammapy.background import Cube, CubeBackgroundModel
 from gammapy.obs import ObservationGroups
 from gammapy.datasets import make_test_dataset
 
 
-DEBUG = 2 # 0: no output, 1: output, 2: run fast, 3: more verbose
+DEBUG = 0 # 0: normal, 1: run fast (test mode)
 GRAPH_DEBUG = 1 # 0: no plots, 1: make plots, 2: wait between steps (bins), 3: draw 3D scatter plots (not implemented)
 CLEAN_WORKING_DIR = 1 # remove existing observation and bg cube model files
-USE_DUMMY_DATA = 1
+USE_DUMMY_DATA = 0 # to use dummy dataset
+METHOD = 'default' # to use the default method to produce the cubes
+#METHOD = 'michi' # to use Michael Mayer's method to produce the cubes
 
 HESSFITS_MPP = '/home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std'
 DUMMYFITS = '/home/mapaz/astropy/development_code/astropy_scripts/astropy_scripts/' + 'test_dataset'
-SCHEME = 'hess'
+SCHEME = 'HESS'
 OBSERVATORY_NAME = 'HESS' # in case USE_DUMMY_DATA is activated
 
 def bg_cube_models_debug_plots(indir):
@@ -31,11 +33,10 @@ def bg_cube_models_debug_plots(indir):
     """
     # TODO: call plot_bg_cube_model_comparison !!!
 
-    if DEBUG:
-        print()
-        print("#######################################")
-        print("# Starting bg_cube_models_debug_plots #")
-        print("#######################################")
+    print()
+    print("#######################################")
+    print("# Starting bg_cube_models_debug_plots #")
+    print("#######################################")
 
     # read observation grouping
     infile = indir + '/bg_observation_groups.ecsv'
@@ -43,23 +44,23 @@ def bg_cube_models_debug_plots(indir):
 
     # loop over observation groups
     groups = observation_groups.list_of_groups
-    if DEBUG:
-        print()
-        print("list of groups", groups)
+    print()
+    print("list of groups", groups)
 
     for group in groups:
-        if DEBUG:
-            print()
-            print("group", group)
+        print()
+        print("group", group)
 
         # read bg cube model from file
-        infile = indir +\
+        infile = indir + \
                  '/bg_cube_model_group{}_table.fits.gz'.format(group)
         # skip bins with no bg cube model file
         if not os.path.isfile(infile):
             print("WARNING, file not found: {}".format(infile))
             continue # skip the rest
-        bg_cube_model = Cube.read(infile, format='table', scheme='bg_cube')
+        #bg_cube_model = Cube.read(infile, format='table', scheme='bg_cube')
+        bg_cube_model = CubeBackgroundModel.read(filename, format='table').background_cube
+        # TODO: I could actually plot also the events (counts) or livetime cubes!!!
 
         fig, axes = plt.subplots(nrows=1, ncols=3)
         fig.set_size_inches(30., 8., forward=True)
@@ -99,9 +100,10 @@ def bg_cube_models_debug_plots(indir):
 def test_make_bg_cube_models():
     """
     gammapy-make-bg-cube-models -h
-    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std hess bg_cube_models
-    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std hess bg_cube_models --test True
-    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std hess bg_cube_models --test True --overwrite
+    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std HESS bg_cube_models
+    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std HESS bg_cube_models --test
+    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std HESS bg_cube_models --test --overwrite
+    gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std HESS bg_cube_models --a-la-michi
     """
     # Need to make sure the working dir is clean, otherwise old
     # files could be mixed up in the new models!
@@ -120,7 +122,7 @@ def test_make_bg_cube_models():
           os.system(command)
 
     test = False
-    if DEBUG > 1:
+    if DEBUG:
         # run fast (test mode)
         test = True
 
@@ -132,8 +134,10 @@ def test_make_bg_cube_models():
     if USE_DUMMY_DATA:
         # update fits path and generate dataset
         fits_path = DUMMYFITS
-        #n_obs = 10
-        n_obs = 2
+        n_obs = 10
+        if DEBUG:
+            # run fast (test mode)
+            n_obs = 2
         datestart = None
         dateend = None
         #random_state = 'random-seed'
@@ -147,7 +151,7 @@ def test_make_bg_cube_models():
                           dateend=dateend,
                           random_state=random_state)
 
-    make_bg_cube_models(fitspath=fits_path, scheme=SCHEME, outdir=outdir, overwrite=overwrite, test=test)
+    make_bg_cube_models(fitspath=fits_path, scheme=SCHEME, outdir=outdir, overwrite=overwrite, test=test, method=METHOD)
 
     if GRAPH_DEBUG:
         # check model: do some plots
