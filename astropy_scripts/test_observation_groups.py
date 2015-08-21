@@ -30,9 +30,6 @@ print(alt_obs_group_axis_from_col.to_column())
 print("ALT from col bins", alt_obs_group_axis.bins)
 
 print()
-alt_obs_group_axis.print() # not working?
-az_obs_group_axis.print() # not working?
-ntels_obs_group_axis.print() # not working?
 print(alt_obs_group_axis.info)
 print(az_obs_group_axis.info)
 print(ntels_obs_group_axis.info)
@@ -42,8 +39,6 @@ array_obs_group_axis = np.array([alt_obs_group_axis, az_obs_group_axis, ntels_ob
 
 obs_groups = ObservationGroups(list_obs_group_axis)
 
-obs_groups.print_groups() # works?
-obs_groups.print_axes() # not working?
 print(obs_groups.info)
 print(obs_groups.obs_groups_table)
 
@@ -104,7 +99,8 @@ assert len(obs_table) == len(obs_table_grouped)
 assert ((0 <= obs_table_grouped['GROUP_ID']) &
         (obs_table_grouped['GROUP_ID'] < obs_groups.n_groups)).all()
 
-print('Done.')
+obs_table_group8 = obs_groups.get_group_of_observations(obs_table_grouped, 8)
+print()
+print(obs_table_group8)
 
-# TODO in ObservationGroups class:
-    # add high level doc with printouts of the observation groups -> do it in the "future" inline command tool for obs groups!!!
+print('Done.')
