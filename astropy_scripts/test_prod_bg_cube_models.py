@@ -105,7 +105,8 @@ def test_make_bg_cube_models():
     gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std HESS bg_cube_models --test --overwrite
     gammapy-make-bg-cube-models /home/mapaz/astropy/gammapy_tutorial/HESS_fits_data/pa/Model_Deconvoluted_Prod26/Mpp_Std HESS bg_cube_models --a-la-michi
     """
-    # Need to make sure the working dir is clean, otherwise old
+    # remove old files
+    # make sure the working dir is clean, otherwise old
     # files could be mixed up in the new models!
     if CLEAN_WORKING_DIR:
         print("Cleaning working dir.")

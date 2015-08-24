@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals) # python 2 as python 3
 import os
+import numpy as np
 from astropy.units import Quantity
 from astropy.coordinates import Angle
 from astropy.time import Time
@@ -10,10 +11,10 @@ from gammapy.obs import (DataStore, ObservationGroups,
 from gammapy.background import make_bg_cube_model
 
 
-TEST = True
-#TEST = False
+#TEST = True # create a small dataset
+TEST = False # create a large dataset (slow)
 
-CLEAN_WORKING_DIR = 1 # remove existing observation and bg cube model files
+CLEAN_WORKING_DIR = 0 # remove existing observation and bg cube model files
 
 # using half hard-coded values from scripts.group_observations
 AZ_RANGE = Angle([90, 270], 'degree')
@@ -45,9 +46,30 @@ def create_dummy_observation_grouping():
 def make_true_model():
     """Make a true bg cube model."""
 
-    # TODO: use dummy obs grouping at the beginning, and avoid
-    #       half hard-coded refs to the group ID or definition (i.e.
-    #       alt az) !!!
+    overwrite = OVERWRITE
+
+    # create output folder
+    outdir = OUTDIR + '/true'
+    if not os.path.isdir(outdir):
+        os.mkdir(outdir)
+    else:
+        if overwrite:
+            # delete and create again
+            shutil.rmtree(outdir) # recursively
+            os.mkdir(outdir)
+        else:
+            # do not overwrite, hence exit
+            s_error = "Cannot continue: directory \'{}\' exists.".format(outdir)
+            raise RuntimeError(s_error)
+
+    # create dummy observation grouping
+    obs_groups = create_dummy_observation_grouping()
+    # save
+    outfile = outdir + '/bg_observation_groups.ecsv'
+    print('Writing {}'.format(outfile, overwrite=overwrite))
+    obs_groups.write(outfile)
+    # TODO: use dummy obs grouping to and avoid half hard-coded refs
+    #       to the group ID or definition (i.e. alt az) !!!
 
     # use hard coded binning in CubeBackgroundModel.define_cube_binning
     detx_range = (Angle(-0.07, 'radian').to('degree'),
@@ -67,8 +89,6 @@ def make_true_model():
     sigma = Angle(5., 'deg'),
     spectral_index = 2.7,
 
-    overwrite = OVERWRITE
-
     bg_cube_model = make_test_bg_cube_model(detx_range=detx_range,
                                             ndetx_bins=ndetx_bins,
                                             dety_range=dety_range,
@@ -79,9 +99,8 @@ def make_true_model():
                                             apply_mask=False)
 
     # save
-    outdir = OUTDIR
     group_id = GROUP_ID
-    outfile = outdir + '/bg_cube_model_group{}_true'.format(group_id)
+    outfile = outdir + '/bg_cube_model_group{}'.format(group_id)
     print("Writing {}".format('{}_table.fits.gz'.format(outfile)))
     print("Writing {}".format('{}_image.fits.gz'.format(outfile)))
     bg_cube_model.write('{}_table.fits.gz'.format(outfile),
@@ -93,18 +112,36 @@ def make_true_model():
 def make_reco_model():
     """Make a reco bg cube model."""
 
-    # TODO: use dummy obs grouping at the beginning, and avoid
-    #       half hard-coded refs to the group ID or definition (i.e.
-    #       alt az) !!!
-
     SCHEME = 'HESS'
     METHOD = 'default'
 
     fits_path = 'test_dataset'
     overwrite = OVERWRITE
     test = TEST
-    outdir = OUTDIR
     group_id = GROUP_ID
+
+    # create output folder
+    outdir = OUTDIR + '/reco'
+    if not os.path.isdir(outdir):
+        os.mkdir(outdir)
+    else:
+        if overwrite:
+            # delete and create again
+            shutil.rmtree(outdir) # recursively
+            os.mkdir(outdir)
+        else:
+            # do not overwrite, hence exit
+            s_error = "Cannot continue: directory \'{}\' exists.".format(outdir)
+            raise RuntimeError(s_error)
+
+    # 0. create dummy observation grouping
+    obs_groups = create_dummy_observation_grouping()
+    # save
+    outfile = outdir + '/bg_observation_groups.ecsv'
+    print('Writing {}'.format(outfile, overwrite=overwrite))
+    obs_groups.write(outfile)
+    # TODO: use dummy obs grouping to and avoid half hard-coded refs
+    #       to the group ID or definition (i.e. alt az) !!!
 
     # 1. create dummy dataset
 
@@ -118,6 +155,7 @@ def make_reco_model():
 
     az_range = AZ_RANGE
     alt_range = ALT_RANGE
+    random_state = np.random.RandomState(seed=0)
 
     make_test_dataset(fits_path=fits_path, overwrite=overwrite,
                       observatory_name='HESS', n_obs=n_obs,
@@ -128,7 +166,7 @@ def make_reco_model():
                                   Time('2015-01-01T00:00:00',
                                        format='isot', scale='utc')),
                       n_tels_range=(3, 4),
-                      random_state='random-seed')
+                      random_state=random_state)
 
     # 2. get observation table
     scheme = SCHEME
@@ -146,7 +184,7 @@ def make_reco_model():
                                        method=method)
 
     # save
-    outfile = outdir + '/bg_cube_model_group{}_reco'.format(group_id)
+    outfile = outdir + '/bg_cube_model_group{}'.format(group_id)
     print("Writing {}".format('{}_table.fits.gz'.format(outfile)))
     print("Writing {}".format('{}_image.fits.gz'.format(outfile)))
     bg_cube_model.write('{}_table.fits.gz'.format(outfile),
@@ -157,15 +195,19 @@ def make_reco_model():
 
 def compare_models():
     """Compare data/binning in both models with a few asserts."""
-    # TODO!!!
     # reat true/reco models
     # compare (assert) the bg data up to a certain tolerance
-
+    # TODO!!! use/emulate plot_bg_cube_model_comparison.py !!!
+    #         there are already print functions for the binning there
+    #         I could refactor in order to:
+    #          - loop over groups, then for each group:
+    #            - do tests (asserts)
+    #            - do plots
 
 def plot_comparison():
     """Compare data in both models with a few plots."""
     # TODO!!! use/emulate plot_bg_cube_model_comparison.py !!!
-    #         for now this script is prepared for using the 
+    #         for now this script is prepared for using the
     #         plot_bg_cube_model_comparison.py script afterwards;
     #         if the latter is refactorized to have a function that
     #         reads 1 group and ouputs the plots, it can be
@@ -196,13 +238,6 @@ if __name__ == '__main__':
             # do not overwrite, hence exit
             s_error = "Cannot continue: directory \'{}\' exists.".format(outdir)
             raise RuntimeError(s_error)
-
-    # create dummy observation grouping
-    obs_groups = create_dummy_observation_grouping()
-    # save
-    outfile = outdir + '/bg_observation_groups.ecsv'
-    print('Writing {}'.format(outfile, overwrite=overwrite))
-    obs_groups.write(outfile)
 
     make_true_model()
     make_reco_model()

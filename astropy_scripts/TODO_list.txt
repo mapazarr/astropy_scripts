@@ -193,3 +193,33 @@ models.py:
     TODO: the same for CubeBackgroundModel class!!!
 
     TODO: the test of the smooth function will fail, once the smoothing method changes (unless I upload a newfile to gammapy-extra)!!!
+
+
+make_test_observation_table:
+ - allow custom ranges for extra variables: i.e. ALT, AZ -> done (maybe add some more?)
+ - allow specifying a range (or specific values?) for RA/DEC (or GLON/GLAT), or a target, then simulate an observation table following a specific target, or scanning a specific region of the sky
+ - make an inline tool for this? "make-obs-list --target Crab"
+
+plot_bg_cube_model_comparison.py
+ - make it more flexible: 3 functions:
+   1. match groups between 2 sets of bg cubes
+   2. loop over groups
+   3. plot comparison
+   4. numbers/data comparison (asserts)
+ this will allow the use in other functions/scripts, for instance in:
+ - make_test_true-reco_bg_cube_models.py -> make_bg_cube_models_true-reco_test.py
+
+make_bg_cube_models_true-reco_test.py, ideas for plot_bg_cube_model_comparison.py
+    # TODO!!! use/emulate plot_bg_cube_model_comparison.py !!!
+    #         for now this script is prepared for using the
+    #         plot_bg_cube_model_comparison.py script afterwards;
+    #         if the latter is refactorized to have a function that
+    #         reads 1 group and ouputs the plots, it can be
+    #         used/called here directly!!!
+
+    # TODO!!! use/emulate plot_bg_cube_model_comparison.py !!!
+    #         there are already print functions for the binning there
+    #         I could refactor in order to:
+    #          - loop over groups, then for each group:
+    #            - do tests (asserts)
+    #            - do plots
