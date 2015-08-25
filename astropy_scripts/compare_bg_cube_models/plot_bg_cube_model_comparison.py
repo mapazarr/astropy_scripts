@@ -25,11 +25,11 @@ NORMALIZE = 0 # normalize 1 w.r.t. 2 (i.e. true w.r.t. reco)
 
 input_dir1 = '/home/mapaz/astropy/working_dir/gammapy_scripts/20150819_ready_to_merge_PR319/bg_cube_models_gammapy_a_la_michi'
 binning_format1 = 'default'
-name1= 'default'
+name1 = 'default'
 
 input_dir2 = '/home/mapaz/HESS/fits_data/pa_fits_prod02/pa/Model_Deconvoluted_Prod26/Mpp_Std/background'
 binning_format2 = 'michi'
-name2= 'michi'
+name2 = 'michi'
 
 # group IDs for comparison
 
@@ -162,8 +162,22 @@ def plot_bg_cube_model_comparison():
             *default* format.
             ref: [Mayer2015]_ (section 5.2.4)
 
+    * **name1**, **name2**: name to use for plot labels/legends.
+
     * **group_ids_selection**: groups to compare; if empty: use all
       groups
+
+    * **NORMALIZE**: normalization to use for the models. If
+      activate, model 1 is normalized to match model 2. This can be
+      useful, when comparing reco models w.r.t. true ones. Options:
+          * *0*: do not normalize
+          * *1*: normalize w.r.t. cube integral
+          * *2*: normalize w.r.t images integral; each image (i.e.
+            energy bin/slice) is normalized independently; this
+            option can alter the spectral shape of the bg rate, but
+            is is the way how smoothing method *michi* normalizes the
+            background cube model, hence it is necessary to compare
+            to those models that use that particular smoothing
 
     * **SAVE**: set to 1 (True) to save the output:
           * comparison plots as png
