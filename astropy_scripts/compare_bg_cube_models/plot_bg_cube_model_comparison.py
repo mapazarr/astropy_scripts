@@ -247,6 +247,8 @@ def plot_bg_cube_model_comparison():
                                                       format='table').background_cube
             bg_cube_model2 = CubeBackgroundModel.read(filename2,
                                                       format='table').background_cube
+            #bg_cube_model2 = CubeBackgroundModel.read(filename2,
+            #                                          format='table').counts_cube # events!!!
 
             # normalize 1 w.r.t. 2 (i.e. true w.r.t. reco)
             if NORMALIZE == 1:

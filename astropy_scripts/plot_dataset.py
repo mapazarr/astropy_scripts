@@ -14,6 +14,15 @@ SAVE = 0
 FITSPATH = '/home/mapaz/astropy/working_dir/bg_cube_models_comparison/gammapy_true_vs_reco/20150901_debugging_true_reco' + '/test_dataset'
 SCHEME = 'HESS'
 
+# model parameters: TODO: match them to the dataset!!!
+
+E_REF = Quantity(1., 'TeV') # reference energy
+#NORM = Quantity(1., '1 / (s TeV sr)')
+NORM = 1
+#INDEX = 2.7
+#INDEX = 2.0
+INDEX = 1.5
+
 
 def power_law(energy, E_0, norm, index):
     # TODO: use gammapy/spectrum/powerlaw.py for power-law functions!!!
@@ -61,14 +70,11 @@ def plot_dataset():
     # plotting #
     ############
 
-    # model parameters: TODO: match them to the dataset!!!
+    # model parameters
 
-    E_0 = Quantity(1., 'TeV') # reference energy
-    #norm = Quantity(1., '1 / (s TeV sr)')
-    norm = 1
-    #index = 2.7
-    #index = 2.0
-    index = 1.5
+    E_0 = E_REF
+    norm = NORM
+    index = INDEX
     #index = index - 1 ## seems to work for sample_PL (it does exp = 1 - gamma, why??!!!) -> workaround: use sample_PL(index+1)
 
     n_events = len(ev_table) # not used in the current version!!!
