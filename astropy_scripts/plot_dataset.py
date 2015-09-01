@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals) # python 2 as python 3
 import numpy as np
+import matplotlib.pyplot as plt
 from astropy.units import Quantity, UnitsError
 from astropy.coordinates import Angle
 from astropy.table import Table
@@ -8,6 +9,7 @@ from gammapy.obs import DataStore
 from gammapy.data import EventListDataset
 
 GRAPH_DEBUG = 0
+SAVE = 0
 
 FITSPATH = '/home/mapaz/astropy/working_dir/bg_cube_models_comparison/gammapy_true_vs_reco/20150901_debugging_true_reco' + '/test_dataset'
 SCHEME = 'HESS'
@@ -59,37 +61,17 @@ def plot_dataset():
     # plotting #
     ############
 
+    # model parameters: TODO: match them to the dataset!!!
+
     E_0 = Quantity(1., 'TeV') # reference energy
     #norm = Quantity(1., '1 / (s TeV sr)')
     norm = 1
-    index = 2.7
-    #index = 2.7 - 1 ## seems to work for sample_PL (it does exp = 1 - gamma, why??!!!)
-    #index = -2.7
-    #index = -2.7 - 1 ## seems to be very similar to the simulation
-    #index = -2.7 - 5
-    #index = -2.7 + 1
+    #index = 2.7
+    #index = 2.0
+    index = 1.5
+    #index = index - 1 ## seems to work for sample_PL (it does exp = 1 - gamma, why??!!!) -> workaround: use sample_PL(index+1)
 
-    n_events = len(ev_table)
-
-    # energy histogram: linear binning
-
-    import matplotlib.pyplot as plt
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-
-    count, bins, ignored = ax.hist(ev_energy.value, bins=30)
-    #ax.plot(bins, power_law(bins, E_0, norm, index))
-    #normed_PL = n_events*np.diff(bins)[-1]*power_law(bins, E_0, norm, index)
-    #normed_PL = n_events*np.diff(bins)[0]*power_law(bins, E_0, norm, index)
-    hist_int = (count*np.diff(bins)).sum()
-    #from scipy.integrate import quad
-    #model_int = quad(power_law(bins, E_0, norm, index), energy_band[0].value, energy_band[1].value)
-    energy_band = Quantity([0.1, 100.], 'TeV')
-    model_int = int_power_law(energy_band, E_0, norm, index)
-    normed_PL = hist_int/model_int*power_law(bins, E_0, norm, index)
-    ax.plot(bins, normed_PL, color='red')
-    if GRAPH_DEBUG:
-        plt.show() # wait until image is closed
+    n_events = len(ev_table) # not used in the current version!!!
 
     # energy histogram: log binning
 
@@ -99,28 +81,29 @@ def plot_dataset():
     # energy bins (logarithmic)
     #energy_band = Quantity([0.1, 80.], 'TeV')
     energy_band = Quantity([0.1, 100.], 'TeV')
-    #energy_band = Quantity([0.001, 1.], 'TeV')
     nenergy_bins = 20
     log_delta_energy = (np.log(energy_band[1].value)
                         - np.log(energy_band[0].value))/nenergy_bins
     energy_edges = np.exp(np.arange(nenergy_bins + 1)*log_delta_energy
                           + np.log(energy_band[0].value))
     energy_edges = Quantity(energy_edges, energy_band[0].unit)
-    #count, bins, ignored = ax.hist(ev_energy.value, energy_edges.value, normed=1, histtype='bar', rwidth=0.8)
     count, bins, ignored = ax.hist(ev_energy.value, energy_edges.value)
-    #count, bins, ignored = ax.hist(ev_energy.value, energy_edges.value, normed=True) # very similar to the bg cube rate
-    #ax.plot(bins, power_law(bins, E_0, norm, index))
-    #normed_PL = n_events*np.diff(bins)[-1]*power_law(bins, E_0, norm, index)
-    ###normed_PL = n_events*np.diff(bins)[0]*power_law(bins, E_0, norm, index)
+
+    # plot normalized model on top
     hist_int = (count*np.diff(bins)).sum()
-    #from scipy.integrate import quad
-    #model_int = quad(power_law(bins, E_0, norm, index), energy_band[0].value, energy_band[1].value)
     model_int = int_power_law(energy_band, E_0, norm, index)
     normed_PL = hist_int/model_int*power_law(bins, E_0, norm, index)
     ax.plot(bins, normed_PL, color='red')
+
     ax.loglog() # double log scale # slow!
+
     if GRAPH_DEBUG:
         plt.show() # wait until image is closed
+
+    if SAVE:
+        outfile = "dataset_energy_hist.png"
+        print('Writing {}'.format(outfile))
+        fig.savefig(outfile)
 
     plt.show() #don't quit at the end
 
