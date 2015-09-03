@@ -39,7 +39,7 @@ def bg_cube_models_debug_plots(indir):
     print("#######################################")
 
     # read observation grouping
-    infile = indir + '/bg_observation_groups.ecsv'
+    infile = os.path.join(indir, 'bg_observation_groups.ecsv')
     observation_groups = ObservationGroups.read(infile)
 
     # loop over observation groups
@@ -52,8 +52,8 @@ def bg_cube_models_debug_plots(indir):
         print("group", group)
 
         # read bg cube model from file
-        infile = indir + \
-                 '/bg_cube_model_group{}_table.fits.gz'.format(group)
+        infile = os.path.join(indir,
+                              '/bg_cube_model_group{}_table.fits.gz'.format(group))
         # skip bins with no bg cube model file
         if not os.path.isfile(infile):
             print("WARNING, file not found: {}".format(infile))
@@ -128,7 +128,7 @@ def test_make_bg_cube_models():
         test = True
 
     fits_path = HESSFITS_MPP
-    #outdir = os.environ['PWD'] + '/bg_cube_models/'
+    #outdir = os.path.join(os.environ['PWD'], 'bg_cube_models')
     outdir = 'bg_cube_models'
     overwrite = False
 

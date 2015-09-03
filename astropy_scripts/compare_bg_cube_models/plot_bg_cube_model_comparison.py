@@ -4,6 +4,7 @@ Script to produce plots comparing 2 sets of background cube models.
 Details in stringdoc of the plot_bg_cube_model_comparison function.
 """
 
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 #from matplotlib.colors import LogNorm
@@ -23,19 +24,22 @@ NORMALIZE = 0 # normalize 1 w.r.t. 2 (i.e. true w.r.t. reco)
               # 1: normalize w.r.t. cube integral
               # 2: normalize w.r.t images integral (normalize each image on its own)
 
-input_dir1 = '/home/mapaz/astropy/working_dir/bg_cube_models_comparison/gammapy_vs_hess-host/gammapy_scripts/20150831_for_hess_confluence/bg_cube_models_gammapy_a_la_michi'
-binning_format1 = 'default'
-name1 = 'gammapy'
+INPUT_DIR1 = '/home/mapaz/astropy/working_dir/bg_cube_models_comparison/gammapy_vs_hess-host/gammapy_scripts/20150831_for_hess_confluence/bg_cube_models_gammapy_a_la_michi'
+BINNING_FORMAT1 = 'default'
+NAME1 = 'gammapy'
 
-input_dir2 = '/home/mapaz/HESS/fits_data/pa_fits_prod02/pa/Model_Deconvoluted_Prod26/Mpp_Std/background'
-binning_format2 = 'michi'
-name2 = 'michi'
+INPUT_DIR2 = '/home/mapaz/HESS/fits_data/pa_fits_prod02/pa/Model_Deconvoluted_Prod26/Mpp_Std/background'
+BINNING_FORMAT2 = 'michi'
+NAME2 = 'michi'
 
 E_REF = Quantity(1., 'TeV') # reference energy
 NORM = 1
 #INDEX = 2.7
 #INDEX = 2.0
 INDEX = 1.5
+
+#SHOW_MODELS = True
+SHOW_MODELS = False
 
 
 def power_law(energy, E_0, norm, index):
@@ -57,48 +61,51 @@ def int_power_law(energy_band, E_0, norm, index):
 #  - az_bin_ids_selection = [0, 1]
 group_ids_selection = [14, 15, 20, 21, 26, 27]
 
-# observation groups binning definition "michi"
+def convert_obs_groups_binning_def_michi_to_default():
+    """Convert observation groups binning definition "michi" to "default".
+    """
+    # observation groups binning definition "michi"
 
-# alt az bin edges definitions
-altitude_edges = Angle([0, 20, 23, 27, 30, 33, 37, 40, 44, 49, 53, 58, 64, 72, 90], 'degree')
-azimuth_edges = Angle([-90, 90, 270], 'degree')
+    # alt az bin edges definitions
+    altitude_edges = Angle([0, 20, 23, 27, 30, 33, 37, 40, 44, 49, 53, 58, 64, 72, 90], 'degree')
+    azimuth_edges = Angle([-90, 90, 270], 'degree')
 
-# convert observation groups binning definition "michi" to "default"
+    # convert observation groups binning definition "michi" to "default"
 
-list_obs_group_axis = [ObservationGroupAxis('ALT', altitude_edges, 'bin_edges'),
-                       ObservationGroupAxis('AZ', azimuth_edges, 'bin_edges')]
-obs_groups_michi = ObservationGroups(list_obs_group_axis)
-print("Observation groups 'michi':")
-print(obs_groups_michi.obs_groups_table)
-if SAVE and (binning_format1 == 'michi' or binning_format2 == 'michi'):
+    list_obs_group_axis = [ObservationGroupAxis('ALT', altitude_edges, 'bin_edges'),
+                           ObservationGroupAxis('AZ', azimuth_edges, 'bin_edges')]
+    obs_groups_michi = ObservationGroups(list_obs_group_axis)
+    print("Observation groups 'michi':")
+    print(obs_groups_michi.obs_groups_table)
+    # save
     outfile = 'bg_observation_groups_michi.ecsv'
     print('Writing {}'.format(outfile))
     obs_groups_michi.write(outfile)
 
-# lookup table: equivalences in group/file naming "defualt" <-> "michi"
-# 3 columns: GROUP_ID, ALT_ID, AZ_ID
-# 28 rows: 1 per GROUP_ID
+    # lookup table: equivalences in group/file naming "defualt" <-> "michi"
+    # 3 columns: GROUP_ID, ALT_ID, AZ_ID
+    # 28 rows: 1 per GROUP_ID
 
-lookup_obs_groups_michi = Table()
-n_cols = 1 + len(list_obs_group_axis)
-n_rows = obs_groups_michi.n_groups
-lookup_obs_groups_michi['GROUP_ID'] = np.zeros(n_rows, dtype=np.int)
-lookup_obs_groups_michi['ALT_ID'] = np.zeros(n_rows, dtype=np.int)
-lookup_obs_groups_michi['AZ_ID'] = np.zeros(n_rows, dtype=np.int)
+    lookup_obs_groups_michi = Table()
+    n_cols = 1 + len(list_obs_group_axis)
+    n_rows = obs_groups_michi.n_groups
+    lookup_obs_groups_michi['GROUP_ID'] = np.zeros(n_rows, dtype=np.int)
+    lookup_obs_groups_michi['ALT_ID'] = np.zeros(n_rows, dtype=np.int)
+    lookup_obs_groups_michi['AZ_ID'] = np.zeros(n_rows, dtype=np.int)
 
-# loop over each observation group axis
-count_groups = 0
-for alt_id in np.arange(len(altitude_edges) - 1):
-    for az_id in np.arange(len(azimuth_edges) - 1):
-        lookup_obs_groups_michi['GROUP_ID'][count_groups] = count_groups
-        lookup_obs_groups_michi['ALT_ID'][count_groups] = alt_id
-        lookup_obs_groups_michi['AZ_ID'][count_groups] = az_id
-        count_groups += 1
+    # loop over each observation group axis
+    count_groups = 0
+    for alt_id in np.arange(len(altitude_edges) - 1):
+        for az_id in np.arange(len(azimuth_edges) - 1):
+            lookup_obs_groups_michi['GROUP_ID'][count_groups] = count_groups
+            lookup_obs_groups_michi['ALT_ID'][count_groups] = alt_id
+            lookup_obs_groups_michi['AZ_ID'][count_groups] = az_id
+            count_groups += 1
 
-print("lookup table:")
-print(lookup_obs_groups_michi)
+    print("lookup table:")
+    print(lookup_obs_groups_michi)
 
-if SAVE and (binning_format1 == 'michi' or binning_format2 == 'michi'):
+    # save
     outfile = 'lookup_obs_groups_michi.ecsv'
     print('Writing {}'.format(outfile))
     # `~astropy.io.ascii` always overwrites the file
@@ -122,6 +129,10 @@ def look_obs_groups_michi(group_id):
     i_az : int
         Azimuth bin index corresponding to the requested group ID.
     """
+    #read lookup
+    filename = 'lookup_obs_groups_michi.ecsv'
+    lookup_obs_groups_michi = ascii.read(filename)
+
     # find group row in lookup table
     group_ids = lookup_obs_groups_michi['GROUP_ID'].data
     group_index = np.where(group_ids == group_id)
@@ -137,7 +148,8 @@ def look_obs_groups_michi(group_id):
 #       The same applies to the look function!!!
 
 
-def plot_bg_cube_model_comparison():
+def plot_bg_cube_model_comparison(input_dir1, binning_format1, name1,
+                                  input_dir2, binning_format2, name2):
     """
     Plot background cube model comparison.
 
@@ -165,21 +177,6 @@ def plot_bg_cube_model_comparison():
 
     The script can be customized by setting a few global variables:
 
-    * **input_dir1**, **input_dir2**: directory where the
-      corresponding set of bg cube models is stored.
-
-    * **binning_format1**, **binning_format2**: binning format;
-      accepted values are:
-          * *default* for the Gammapy format from
-            `~gammapy.obs.ObservationGroups`; an observation groups
-            ECVS file is expected in the bg cube models dir.
-          * *michi* for the binning used by Michale Mayer;
-            this script has methods to convert it to the
-            *default* format.
-            ref: [Mayer2015]_ (section 5.2.4)
-
-    * **name1**, **name2**: name to use for plot labels/legends.
-
     * **group_ids_selection**: groups to compare; if empty: use all
       groups
 
@@ -202,13 +199,31 @@ def plot_bg_cube_model_comparison():
     * **GRAPH_DEBUG**: if set to 1 (True) the program waits between
       each observation group iteration until the image is closed
 
+    * **SHOW_MODELS**, **E_REF**, **NORM**, **INDEX**: to plot some
+      power-laws normalized to the bg rate spectra for comparison
+
+    Parameters
+    ----------
+    input_dir1, input_dir2 : str
+        Directory where the corresponding set of bg cube models is stored.
+    binning_format1, binning_format2 : {'default', 'michi'}
+        String specifying the binning format; accepted values are:
+
+        * *default* for the Gammapy format from
+          `~gammapy.obs.ObservationGroups`; an observation groups
+          ECVS file is expected in the bg cube models dir.
+        * *michi* for the binning used by Michale Mayer;
+          this script has methods to convert it to the
+          *default* format.
+          ref: [Mayer2015]_ (section 5.2.4)
+
+    name1, name2 : str
+        Name to use for plot labels/legends.
+
     References
     ==========
-
     .. [Mayer2015] `Michael Mayer (2015) <https://publishup.uni-potsdam.de/frontdoor/index/index/docId/7150>`_
        "Pulsar wind nebulae at high energies"
-
-    TODO: argparser to avoid that many global variables
     """
     # check binning
     accepted_binnings = ['default', 'michi']
@@ -217,6 +232,10 @@ def plot_bg_cube_model_comparison():
         (binning_format2 not in accepted_binnings)):
         raise ValueError("Invalid binning format: {0} or {1}".format(binning_format1,
                                                                      binning_format2))
+
+    # convert binning, if necessary
+    if binning_format1 == 'michi' or binning_format2 == 'michi':
+        convert_obs_groups_binning_def_michi_to_default()
 
     # loop over observation groups: use binning of the 1st set to compare
     if binning_format1 == 'michi':
@@ -332,33 +351,35 @@ def plot_bg_cube_model_comparison():
             else:
                 axes[0, 2].set_title(spec_title1)
 
-            # plot normalized models on top
+            if SHOW_MODELS:
+                # plot normalized models on top
 
-            E_0 = E_REF
-            norm = NORM
-            index = INDEX
+                E_0 = E_REF
+                norm = NORM
+                index = INDEX
 
-            plot_data_x = axes[0, 2].get_lines()[0].get_xydata()[:,0]
-            plot_data_y = axes[0, 2].get_lines()[0].get_xydata()[:,1]
-            plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
-            energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
-            model_int = int_power_law(energy_band, E_0, norm, index)
-            normed_PL1 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
-            axes[0, 2].plot(plot_data_x, normed_PL1, color='blue',
-                            linestyle='dotted', linewidth=2,
-                            label='model index = {}'.format(index))
+                plot_data_x = axes[0, 2].get_lines()[0].get_xydata()[:,0]
+                plot_data_y = axes[0, 2].get_lines()[0].get_xydata()[:,1]
+                plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
+                energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
+                model_int = int_power_law(energy_band, E_0, norm, index)
+                normed_PL1 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
+                axes[0, 2].plot(plot_data_x, normed_PL1, color='blue',
+                                linestyle='dotted', linewidth=2,
+                                label='model index = {}'.format(index))
 
-            index = INDEX + 1
+                index = INDEX + 1
 
-            plot_data_x = axes[0, 2].get_lines()[0].get_xydata()[:,0]
-            plot_data_y = axes[0, 2].get_lines()[0].get_xydata()[:,1]
-            plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
-            energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
-            model_int = int_power_law(energy_band, E_0, norm, index)
-            normed_PL2 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
-            axes[0, 2].plot(plot_data_x, normed_PL2, color='blue',
-                            linestyle='dashed', linewidth=2,
-                            label='model index = {}'.format(index))
+                plot_data_x = axes[0, 2].get_lines()[0].get_xydata()[:,0]
+                plot_data_y = axes[0, 2].get_lines()[0].get_xydata()[:,1]
+                plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
+                energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
+                model_int = int_power_law(energy_band, E_0, norm, index)
+                normed_PL2 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
+                axes[0, 2].plot(plot_data_x, normed_PL2, color='blue',
+                                linestyle='dashed', linewidth=2,
+                                label='model index = {}'.format(index))
+
             axes[0, 2].legend()
 
             bg_cube_model1.plot_spectrum(coord=Angle([2., 2.], 'degree'),
@@ -378,33 +399,34 @@ def plot_bg_cube_model_comparison():
             else:
                 axes[1, 2].set_title(spec_title1)
 
-            # plot normalized models on top
+            if SHOW_MODELS:
+                # plot normalized models on top
 
-            E_0 = E_REF
-            norm = NORM
-            index = INDEX
+                E_0 = E_REF
+                norm = NORM
+                index = INDEX
 
-            plot_data_x = axes[1, 2].get_lines()[0].get_xydata()[:,0]
-            plot_data_y = axes[1, 2].get_lines()[0].get_xydata()[:,1]
-            plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
-            energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
-            model_int = int_power_law(energy_band, E_0, norm, index)
-            normed_PL1 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
-            axes[1, 2].plot(plot_data_x, normed_PL1, color='blue',
-                            linestyle='dotted', linewidth=2,
-                            label='model index = {}'.format(index))
+                plot_data_x = axes[1, 2].get_lines()[0].get_xydata()[:,0]
+                plot_data_y = axes[1, 2].get_lines()[0].get_xydata()[:,1]
+                plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
+                energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
+                model_int = int_power_law(energy_band, E_0, norm, index)
+                normed_PL1 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
+                axes[1, 2].plot(plot_data_x, normed_PL1, color='blue',
+                                linestyle='dotted', linewidth=2,
+                                label='model index = {}'.format(index))
 
-            index = INDEX + 1
+                index = INDEX + 1
 
-            plot_data_x = axes[1, 2].get_lines()[0].get_xydata()[:,0]
-            plot_data_y = axes[1, 2].get_lines()[0].get_xydata()[:,1]
-            plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
-            energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
-            model_int = int_power_law(energy_band, E_0, norm, index)
-            normed_PL2 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
-            axes[1, 2].plot(plot_data_x, normed_PL2, color='blue',
-                            linestyle='dashed', linewidth=2,
-                            label='model index = {}'.format(index))
+                plot_data_x = axes[1, 2].get_lines()[0].get_xydata()[:,0]
+                plot_data_y = axes[1, 2].get_lines()[0].get_xydata()[:,1]
+                plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
+                energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
+                model_int = int_power_law(energy_band, E_0, norm, index)
+                normed_PL2 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
+                axes[1, 2].plot(plot_data_x, normed_PL2, color='blue',
+                                linestyle='dashed', linewidth=2,
+                                label='model index = {}'.format(index))
 
             axes[1, 2].legend()
 
@@ -420,4 +442,45 @@ def plot_bg_cube_model_comparison():
 
 
 if __name__ == '__main__':
-    plot_bg_cube_model_comparison()
+    """Main function: parse arguments and launch the whole analysis chain.
+    """
+    parser = argparse.ArgumentParser(description='Compare 2 sets of bg cube models.')
+
+    parser.add_argument('--input-dir1', type=str,
+                        default=INPUT_DIR1,
+                        help='Directory where the corresponding set '
+                        'of bg cube models is stored. '
+                        '(default is {}).'.format(INPUT_DIR1))
+
+    parser.add_argument('--binning-format1', type=str,
+                        default=BINNING_FORMAT1,
+                        choices=['default', 'michi'],
+                        help='String specifying the binning format. '
+                        '(default is {}).'.format(BINNING_FORMAT1))
+
+    parser.add_argument('--name1', type=str,
+                        default=NAME1,
+                        help='Name to use for plot labels/legends. '
+                        '(default is {}).'.format(NAME1))
+
+    parser.add_argument('--input-dir2', type=str,
+                        default=INPUT_DIR2,
+                        help='Directory where the corresponding set '
+                        'of bg cube models is stored. '
+                        '(default is {}).'.format(INPUT_DIR2))
+
+    parser.add_argument('--binning-format2', type=str,
+                        default=BINNING_FORMAT2,
+                        choices=['default', 'michi'],
+                        help='String specifying the binning format. '
+                        '(default is {}).'.format(BINNING_FORMAT2))
+
+    parser.add_argument('--name2', type=str,
+                        default=NAME2,
+                        help='Name to use for plot labels/legends. '
+                        '(default is {}).'.format(NAME2))
+
+    args = parser.parse_args()
+
+    plot_bg_cube_model_comparison(args.input_dir1, args.binning_format1, args.name1,
+                                  args.input_dir2, args.binning_format2, args.name2)
