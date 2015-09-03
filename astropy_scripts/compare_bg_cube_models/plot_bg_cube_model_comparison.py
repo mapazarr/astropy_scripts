@@ -31,6 +31,22 @@ input_dir2 = '/home/mapaz/HESS/fits_data/pa_fits_prod02/pa/Model_Deconvoluted_Pr
 binning_format2 = 'michi'
 name2 = 'michi'
 
+E_REF = Quantity(1., 'TeV') # reference energy
+NORM = 1
+#INDEX = 2.7
+#INDEX = 2.0
+INDEX = 1.5
+
+
+def power_law(energy, E_0, norm, index):
+    # TODO: use gammapy/spectrum/powerlaw.py for power-law functions!!!
+    return norm*(energy/E_0)**-index
+
+
+def int_power_law(energy_band, E_0, norm, index):
+    # TODO: use gammapy/spectrum/powerlaw.py for power-law functions!!!
+    return norm/(1 - index)/E_0**-index*(energy_band[1]**(1 - index) - energy_band[0]**(1 - index))
+
 # group IDs for comparison
 
 #  The following group IDs
@@ -315,6 +331,34 @@ def plot_bg_cube_model_comparison():
                 raise ValueError(s_error)
             else:
                 axes[0, 2].set_title(spec_title1)
+
+            # plot normalized models on top
+
+            E_0 = E_REF
+            norm = NORM
+            index = INDEX
+
+            plot_data_x = axes[0, 2].get_lines()[0].get_xydata()[:,0]
+            plot_data_y = axes[0, 2].get_lines()[0].get_xydata()[:,1]
+            plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
+            energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
+            model_int = int_power_law(energy_band, E_0, norm, index)
+            normed_PL1 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
+            axes[0, 2].plot(plot_data_x, normed_PL1, color='blue',
+                            linestyle='dotted', linewidth=2,
+                            label='model index = {}'.format(index))
+
+            index = INDEX + 1
+
+            plot_data_x = axes[0, 2].get_lines()[0].get_xydata()[:,0]
+            plot_data_y = axes[0, 2].get_lines()[0].get_xydata()[:,1]
+            plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
+            energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
+            model_int = int_power_law(energy_band, E_0, norm, index)
+            normed_PL2 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
+            axes[0, 2].plot(plot_data_x, normed_PL2, color='blue',
+                            linestyle='dashed', linewidth=2,
+                            label='model index = {}'.format(index))
             axes[0, 2].legend()
 
             bg_cube_model1.plot_spectrum(coord=Angle([2., 2.], 'degree'),
@@ -333,6 +377,35 @@ def plot_bg_cube_model_comparison():
                 raise ValueError(s_error)
             else:
                 axes[1, 2].set_title(spec_title1)
+
+            # plot normalized models on top
+
+            E_0 = E_REF
+            norm = NORM
+            index = INDEX
+
+            plot_data_x = axes[1, 2].get_lines()[0].get_xydata()[:,0]
+            plot_data_y = axes[1, 2].get_lines()[0].get_xydata()[:,1]
+            plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
+            energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
+            model_int = int_power_law(energy_band, E_0, norm, index)
+            normed_PL1 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
+            axes[1, 2].plot(plot_data_x, normed_PL1, color='blue',
+                            linestyle='dotted', linewidth=2,
+                            label='model index = {}'.format(index))
+
+            index = INDEX + 1
+
+            plot_data_x = axes[1, 2].get_lines()[0].get_xydata()[:,0]
+            plot_data_y = axes[1, 2].get_lines()[0].get_xydata()[:,1]
+            plot_data_int = np.trapz(y=plot_data_y, x=plot_data_x)
+            energy_band = np.array([plot_data_x[0], plot_data_x[-1]])
+            model_int = int_power_law(energy_band, E_0, norm, index)
+            normed_PL2 = plot_data_int/model_int*power_law(plot_data_x, E_0, norm, index)
+            axes[1, 2].plot(plot_data_x, normed_PL2, color='blue',
+                            linestyle='dashed', linewidth=2,
+                            label='model index = {}'.format(index))
+
             axes[1, 2].legend()
 
             if GRAPH_DEBUG:
