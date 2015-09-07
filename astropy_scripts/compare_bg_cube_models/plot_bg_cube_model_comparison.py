@@ -13,7 +13,6 @@ from astropy.coordinates import Angle
 from astropy.table import Table
 from astropy.io import ascii
 from gammapy.background import CubeBackgroundModel
-
 from gammapy.obs import ObservationGroups, ObservationGroupAxis
 
 GRAPH_DEBUG = 0
@@ -51,6 +50,7 @@ def int_power_law(energy_band, E_0, norm, index):
     # TODO: use gammapy/spectrum/powerlaw.py for power-law functions!!!
     return norm/(1 - index)/E_0**-index*(energy_band[1]**(1 - index) - energy_band[0]**(1 - index))
 
+
 # group IDs for comparison
 
 #  The following group IDs
@@ -60,6 +60,7 @@ def int_power_law(energy_band, E_0, norm, index):
 #  - alt_bin_ids_selection = [7, 10, 13]
 #  - az_bin_ids_selection = [0, 1]
 group_ids_selection = [14, 15, 20, 21, 26, 27]
+
 
 def convert_obs_groups_binning_def_michi_to_default():
     """Convert observation groups binning definition "michi" to "default".
